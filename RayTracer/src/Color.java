@@ -1,4 +1,3 @@
-//Stephen is testing Git....
 public class Color {
 	public static int MAX_ALPHA = 1;
 	// fields
