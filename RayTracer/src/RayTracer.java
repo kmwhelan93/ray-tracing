@@ -144,12 +144,10 @@ public class RayTracer {
 					}
 
 					// apply lighting
+					// add method that takes in light vector and make a light interface
 					for (Vertex sun : suns) {
 						if (!RayTracer.isSunBlocked(sun, closestLocation,
 								closestObject)) {
-							// System.out.println(closestColor.multiplyColors(
-							// sun.getColor()));
-							// Thread.sleep(200);
 							double nDotI = closestNormal.normalize()
 									.dotProduct(sun.getVector().normalize());
 							if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
