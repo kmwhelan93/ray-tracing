@@ -17,19 +17,25 @@ public class RayTracer {
 	private static int height;
 	private static BufferedImage b;
 	private static WritableRaster r;
+	private static int framesNum;
 	private static Vector eye = new Vector(0, 0, 0);
+	private static ArrayList<BusStop> eyeStops = new ArrayList<BusStop>();
+	private static ArrayList<Vector> eyes = new ArrayList<Vector>();
 	private static Vector forward = new Vector(0, 0, -1);
 	private static Vector right = new Vector(1, 0, 0);
 	private static Vector up = new Vector(0, 1, 0);
-	private static ArrayList<Vertex> suns = new ArrayList<Vertex>();
-	private static ArrayList<Vertex> bulbs = new ArrayList<Vertex>();
+	private static ArrayList<ArrayList<Vertex>> suns = new ArrayList<ArrayList<Vertex>>();
+	private static ArrayList<BusStop> sunStops = new ArrayList<BusStop>();
+	private static ArrayList<ArrayList<Vertex>> bulbs = new ArrayList<ArrayList<Vertex>>();
+	private static ArrayList<BusStop> bulbStops = new ArrayList<BusStop>();
 	private static ArrayList<Sphere> spheres = new ArrayList<Sphere>();
+	private static ArrayList<BusStop> sphereStops = new ArrayList<BusStop>();
 	private static ArrayList<Plane> planes = new ArrayList<Plane>();
+	private static ArrayList<BusStop> planeStops = new ArrayList<BusStop>();
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-		Scanner scan = new Scanner(new File(args[0]));
 
+		Scanner scan = new Scanner(new File("test1.txt"));
 		String filename = "";
 
 		while (scan.hasNextLine()) {
@@ -40,6 +46,7 @@ public class RayTracer {
 					// png
 					width = temp.nextInt();
 					height = temp.nextInt();
+					framesNum = temp.nextInt();
 					filename = temp.nextLine().trim();
 					b = new BufferedImage(width, height,
 							BufferedImage.TYPE_4BYTE_ABGR);
@@ -68,16 +75,26 @@ public class RayTracer {
 					Vector v = new Vector(x, y, z).normalize();
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
+					int id = temp.nextInt();
 					Vertex sun = new Vertex(v, color);
-					suns.add(sun);
+					sun.setId(id);
+					if (id >= suns.size()) {
+						suns.add(new ArrayList<Vertex>());
+					}
+					suns.get(id).add(sun);
 				} else if (command.equals("bulb")) {
 					double x = temp.nextDouble();
 					double y = temp.nextDouble();
 					double z = temp.nextDouble();
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
+					int id = temp.nextInt();
 					Vertex bulb = new Vertex(x, y, z, color);
-					bulbs.add(bulb);
+					bulb.setId(id);
+					if (id >= bulbs.size()) {
+						bulbs.add(new ArrayList<Vertex>());
+					}
+					bulbs.get(id).add(bulb);
 				} else if (command.equals("sphere")) {
 					Vector v = new Vector(temp.nextDouble(), temp.nextDouble(),
 							temp.nextDouble());
@@ -97,88 +114,201 @@ public class RayTracer {
 					planes.add(plane);
 				}
 			}
-
+			temp.close();
 		}
 
-		// draw image, given everything provided
-		for (int row = 0; row < height; row++) {
-			for (int col = 0; col < width; col++) {
-				double s = (2 * col - width) / (double) Math.max(width, height);
-				double t = (height - 2 * row)
-						/ (double) Math.max(width, height);
-				Vector direction = forward.add(right.scale(s)).add(up.scale(t));
-				Ray ray = new Ray(eye, new Vector(direction));
-				double closest = Double.POSITIVE_INFINITY;
-				Vector closestNormal = null;
-				Color closestColor = null;
-				Object closestObject = null;
-				Vector closestLocation = null;
-				for (Sphere sphere : spheres) {
-					double intersect = RayTracer.RayIntersectSphere(ray, sphere);
-					if (intersect >= 0 && intersect < closest) {
-						closest = intersect;
-						Vector location = ray.scale(intersect);
-						closestNormal = sphere.getNormal(location).normalize();
-						closestColor = sphere.getColor();
-						closestObject = sphere;
-						closestLocation = location;
-					}
-				}
-				for (Plane plane : planes) {
-					double intersect = RayTracer.RayIntersectPlane(ray, plane);
-					if (intersect >= 0 && intersect < closest) {
-						closest = intersect;
-						closestNormal = plane.getNormal().normalize();
-						closestColor = plane.getColor();
-						closestObject = plane;
-						closestLocation = ray.scale(intersect);
-					}
-				}
-				if (closestObject != null) {
-					Color toColor = new Color(0, 0, 0, 255);
-					// might invert Color
-					boolean inverted = false;
-					if (closestNormal.dotProduct(eye.subtract(closestLocation)) < 0) {
-						closestColor = closestColor.invert();
-						inverted = true;
-					}
+		scan = new Scanner(new File("test2.txt"));
 
-					// apply lighting
-					// add method that takes in light vector and make a light interface
-					for (Vertex sun : suns) {
-						if (!RayTracer.isSunBlocked(sun, closestLocation,
-								closestObject)) {
-							double nDotI = closestNormal.normalize()
-									.dotProduct(sun.getVector().normalize());
-							if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
-								toColor = toColor.add(closestColor
-										.multiplyColors(sun.getColor())
-										.multiply(nDotI));
-							}
+		while (scan.hasNextLine()) {
+			Scanner temp = new Scanner(scan.nextLine().trim());
+			if (temp.hasNext()) {
+				String command = temp.next();
+				if (command.equals("eye")) {
+					eyeStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
+							temp.nextDouble(), temp.nextDouble(), temp
+									.nextDouble()));
+				} else if (command.equals("sun")) {
+					sunStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
+							temp.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextInt()));
+				}
+			}
+			temp.close();
+		}
 
-						}
-					}
-					for (Vertex bulb : bulbs) {
-						if (!RayTracer.isBulbBlocked(bulb, closestLocation,
-								closestObject)) {
-							double nDotI = closestNormal.normalize()
-									.dotProduct(
-											bulb.getVector()
-													.subtract(closestLocation)
-													.normalize());
-							if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
-								toColor = toColor.add(closestColor
-										.multiplyColors(bulb.getColor())
-										.multiply(nDotI));
-							}
-						}
-					}
-					r.setPixel(col, row, toColor.getColorArray());
+		Vector eyeStart = new Vector(eye.get(0), eye.get(1), eye.get(2));
+
+		for (int i = 1; i <= framesNum; i++) {
+
+			for (BusStop e : eyeStops) {
+				double t = ((double) i - e.getStartFrame())
+						/ (e.getEndFrame() - e.getStartFrame());
+				Vector v = new Vector(e.getVector().get(0) - eyeStart.get(0), e
+						.getVector().get(1) - eyeStart.get(1), e.getVector()
+						.get(2) - eyeStart.get(2));
+				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
+						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
+			}
+			for (BusStop s : sunStops) {
+				if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+					double t = ((double) i - s.getStartFrame())
+							/ (s.getEndFrame() - s.getStartFrame());
+					Vector sunStart = suns.get(s.getId())
+							.get(suns.get(s.getId()).size() - 1).getVector();
+					Vector v = new Vector(s.getVector().get(0)
+							- sunStart.get(0), s.getVector().get(1)
+							- sunStart.get(1), s.getVector().get(2)
+							- sunStart.get(2));
+					Vector newSun = new Vector(sunStart.get(0) + v.get(0) * t,
+							sunStart.get(1) + v.get(1) * t, sunStart.get(2)
+									+ v.get(2) * t);
+					Color color = suns.get(s.getId()).get(0).getColor();
+					Vertex sun = new Vertex(newSun, color);
+					sun.setId(s.getId());
+					suns.get(sun.getId()).add(sun);
+				}
+			}
+
+			for (BusStop b : bulbStops) {
+				if (b.getStartFrame() <= i && b.getEndFrame() >= i) {
+					double t = ((double) i - b.getStartFrame())
+							/ (b.getEndFrame() - b.getStartFrame());
+					Vector bulbStart = bulbs.get(b.getId())
+							.get(bulbs.get(b.getId()).size() - 1).getVector();
+					Vector v = new Vector(b.getVector().get(0)
+							- bulbStart.get(0), b.getVector().get(1)
+							- bulbStart.get(1), b.getVector().get(2)
+							- bulbStart.get(2));
+					Vector newBulb = new Vector(bulbStart.get(0) + v.get(0) * t,
+							bulbStart.get(1) + v.get(1) * t, bulbStart.get(2)
+									+ v.get(2) * t);
+					Color color = bulbs.get(b.getId()).get(0).getColor();
+					Vertex bulb = new Vertex(newBulb, color);
+					bulb.setId(b.getId());
+					bulbs.get(bulb.getId()).add(bulb);
 				}
 			}
 		}
+		for (int i = 0; i < framesNum; i++) {
+			Color clearColor = new Color(0, 0, 0, 0);
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					r.setPixel(x, y, clearColor.getColorArray());
+				}
+			}
 
-		ImageIO.write(b, "png", new File(filename));
+			if (eyes.size() > 0) {
+				eye = eyes.get(i);
+			}
+//			for (ArrayList<Vertex> sunList : suns) {
+//				for (Vertex sun : sunList) {
+//					sun = sunList.get(i);
+//				}
+//			}
+//			for (ArrayList<Vertex> bulbList : bulbs) {
+//				for (Vertex bulb : bulbList) {
+//					bulb = bulbList.get(i);
+//				}
+//			}
+			// draw image, given everything provided
+			for (int row = 0; row < height; row++) {
+				for (int col = 0; col < width; col++) {
+					double s = (2 * col - width)
+							/ (double) Math.max(width, height);
+					double t = (height - 2 * row)
+							/ (double) Math.max(width, height);
+					Vector direction = forward.add(right.scale(s)).add(
+							up.scale(t));
+					Ray ray = new Ray(eye, new Vector(direction));
+					double closest = Double.POSITIVE_INFINITY;
+					Vector closestNormal = null;
+					Color closestColor = null;
+					Object closestObject = null;
+					Vector closestLocation = null;
+					for (Sphere sphere : spheres) {
+						double intersect = RayTracer.RayIntersectSphere(ray,
+								sphere);
+						if (intersect >= 0 && intersect < closest) {
+							closest = intersect;
+							Vector location = ray.scale(intersect);
+							closestNormal = sphere.getNormal(location)
+									.normalize();
+							closestColor = sphere.getColor();
+							closestObject = sphere;
+							closestLocation = location;
+						}
+					}
+					for (Plane plane : planes) {
+						double intersect = RayTracer.RayIntersectPlane(ray,
+								plane);
+						if (intersect >= 0 && intersect < closest) {
+							closest = intersect;
+							closestNormal = plane.getNormal().normalize();
+							closestColor = plane.getColor();
+							closestObject = plane;
+							closestLocation = ray.scale(intersect);
+						}
+					}
+					if (closestObject != null) {
+						Color toColor = new Color(0, 0, 0, 255);
+						// might invert Color
+						boolean inverted = false;
+						if (closestNormal.dotProduct(eye
+								.subtract(closestLocation)) < 0) {
+							closestColor = closestColor.invert();
+							inverted = true;
+						}
+
+						// apply lighting
+						// add method that takes in light vector and make a
+						// light
+						// interface
+						for (ArrayList<Vertex> sunList : suns) {
+							Vertex sun = sunList.get(i);
+							if (!RayTracer.isSunBlocked(sun, closestLocation,
+									closestObject)) {
+								double nDotI = closestNormal
+										.normalize()
+										.dotProduct(sun.getVector().normalize());
+								if ((nDotI > 0 && !inverted)
+										|| (inverted && nDotI < 0)) {
+									toColor = toColor.add(closestColor
+											.multiplyColors(sun.getColor())
+											.multiply(nDotI));
+								}
+
+							}
+						}
+						for (ArrayList<Vertex> bulbList : bulbs) {
+							Vertex bulb = bulbList.get(i);
+							if (!RayTracer.isBulbBlocked(bulb, closestLocation,
+									closestObject)) {
+								double nDotI = closestNormal
+										.normalize()
+										.dotProduct(
+												bulb.getVector()
+														.subtract(
+																closestLocation)
+														.normalize());
+								if ((nDotI > 0 && !inverted)
+										|| (inverted && nDotI < 0)) {
+									toColor = toColor.add(closestColor
+											.multiplyColors(bulb.getColor())
+											.multiply(nDotI));
+								}
+							}
+						}
+						r.setPixel(col, row, toColor.getColorArray());
+					}
+				}
+			}
+
+			scan.close();
+			String newFilename = filename.replace(".png", (i + 1) + ".png");
+			System.out.println("Drawing frame #" + (i + 1) + "...");
+
+			ImageIO.write(b, "png", new File(newFilename));
+		}
 	}
 
 	public static double RayIntersectSphere(Ray ray, Sphere sphere) {
@@ -216,7 +346,8 @@ public class RayTracer {
 		Vector directionToSun = sun.getVector();
 		Ray rayToSun = new Ray(location, directionToSun);
 		for (Sphere sphere : RayTracer.spheres) {
-			if (sphere != o && RayTracer.RayIntersectSphere(rayToSun, sphere) > 0) {
+			if (sphere != o
+					&& RayTracer.RayIntersectSphere(rayToSun, sphere) > 0) {
 				return true;
 			}
 		}

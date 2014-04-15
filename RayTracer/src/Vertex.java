@@ -9,6 +9,7 @@ public class Vertex implements Comparable<Vertex> {
 	private int direction;
 	private double width;
 	private Vector normal;
+	private int id;
 	
 	// getters and setters
 	public Vector getVector() {
@@ -56,6 +57,12 @@ public class Vertex implements Comparable<Vertex> {
 	}
 	public void setWidth(double width) {
 		this.width = width;
+	}
+	public int getId(){
+		return id;
+	}
+	public void setId(int id){
+		this.id = id;
 	}
 	
 	// Constructors
