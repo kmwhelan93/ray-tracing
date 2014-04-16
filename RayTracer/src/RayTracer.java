@@ -28,7 +28,7 @@ public class RayTracer {
 	private static ArrayList<BusStop> sunStops = new ArrayList<BusStop>();
 	private static ArrayList<ArrayList<Vertex>> bulbs = new ArrayList<ArrayList<Vertex>>();
 	private static ArrayList<BusStop> bulbStops = new ArrayList<BusStop>();
-	private static ArrayList<Sphere> spheres = new ArrayList<Sphere>();
+	private static ArrayList<ArrayList<Sphere>> spheres = new ArrayList<ArrayList<Sphere>>();
 	private static ArrayList<BusStop> sphereStops = new ArrayList<BusStop>();
 	private static ArrayList<Plane> planes = new ArrayList<Plane>();
 	private static ArrayList<BusStop> planeStops = new ArrayList<BusStop>();
@@ -101,8 +101,13 @@ public class RayTracer {
 					double radius = temp.nextDouble();
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
+					int id = temp.nextInt();
 					Sphere s = new Sphere(v, radius, color);
-					spheres.add(s);
+					s.setId(id);
+					if (id >= spheres.size()) {
+						spheres.add(new ArrayList<Sphere>());
+					}
+					spheres.get(id).add(s);
 				} else if (command.equals("plane")) {
 					double A = temp.nextDouble();
 					double B = temp.nextDouble();
@@ -129,6 +134,14 @@ public class RayTracer {
 									.nextDouble()));
 				} else if (command.equals("sun")) {
 					sunStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
+							temp.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextInt()));
+				} else if (command.equals("bulb")) {
+					bulbStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
+							temp.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextInt()));
+				} else if (command.equals("sphere")) {
+					sphereStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
 									.nextDouble(), temp.nextInt()));
 				}
@@ -179,13 +192,35 @@ public class RayTracer {
 							- bulbStart.get(0), b.getVector().get(1)
 							- bulbStart.get(1), b.getVector().get(2)
 							- bulbStart.get(2));
-					Vector newBulb = new Vector(bulbStart.get(0) + v.get(0) * t,
-							bulbStart.get(1) + v.get(1) * t, bulbStart.get(2)
-									+ v.get(2) * t);
+					Vector newBulb = new Vector(
+							bulbStart.get(0) + v.get(0) * t, bulbStart.get(1)
+									+ v.get(1) * t, bulbStart.get(2) + v.get(2)
+									* t);
 					Color color = bulbs.get(b.getId()).get(0).getColor();
 					Vertex bulb = new Vertex(newBulb, color);
 					bulb.setId(b.getId());
 					bulbs.get(bulb.getId()).add(bulb);
+				}
+			}
+
+			for (BusStop s : sphereStops) {
+				if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+					double t = ((double) i - s.getStartFrame())
+							/ (s.getEndFrame() - s.getStartFrame());
+					Vector sphereStart = spheres.get(s.getId())
+							.get(spheres.get(s.getId()).size() - 1).getCenter();
+					Vector v = new Vector(s.getVector().get(0)
+							- sphereStart.get(0), s.getVector().get(1)
+							- sphereStart.get(1), s.getVector().get(2)
+							- sphereStart.get(2));
+					Vector newSphere = new Vector(sphereStart.get(0) + v.get(0)
+							* t, sphereStart.get(1) + v.get(1) * t,
+							sphereStart.get(2) + v.get(2) * t);
+					Color color = spheres.get(s.getId()).get(0).getColor();
+					Sphere sphere = new Sphere(newSphere, spheres
+							.get(s.getId()).get(0).getRadius(), color);
+					sphere.setId(s.getId());
+					spheres.get(sphere.getId()).add(sphere);
 				}
 			}
 		}
@@ -200,16 +235,16 @@ public class RayTracer {
 			if (eyes.size() > 0) {
 				eye = eyes.get(i);
 			}
-//			for (ArrayList<Vertex> sunList : suns) {
-//				for (Vertex sun : sunList) {
-//					sun = sunList.get(i);
-//				}
-//			}
-//			for (ArrayList<Vertex> bulbList : bulbs) {
-//				for (Vertex bulb : bulbList) {
-//					bulb = bulbList.get(i);
-//				}
-//			}
+			// for (ArrayList<Vertex> sunList : suns) {
+			// for (Vertex sun : sunList) {
+			// sun = sunList.get(i);
+			// }
+			// }
+			// for (ArrayList<Vertex> bulbList : bulbs) {
+			// for (Vertex bulb : bulbList) {
+			// bulb = bulbList.get(i);
+			// }
+			// }
 			// draw image, given everything provided
 			for (int row = 0; row < height; row++) {
 				for (int col = 0; col < width; col++) {
@@ -225,7 +260,9 @@ public class RayTracer {
 					Color closestColor = null;
 					Object closestObject = null;
 					Vector closestLocation = null;
-					for (Sphere sphere : spheres) {
+
+					for (ArrayList<Sphere> sphereList : spheres) {
+						Sphere sphere = sphereList.get(i);
 						double intersect = RayTracer.RayIntersectSphere(ray,
 								sphere);
 						if (intersect >= 0 && intersect < closest) {
@@ -266,7 +303,7 @@ public class RayTracer {
 						for (ArrayList<Vertex> sunList : suns) {
 							Vertex sun = sunList.get(i);
 							if (!RayTracer.isSunBlocked(sun, closestLocation,
-									closestObject)) {
+									closestObject, i)) {
 								double nDotI = closestNormal
 										.normalize()
 										.dotProduct(sun.getVector().normalize());
@@ -282,7 +319,7 @@ public class RayTracer {
 						for (ArrayList<Vertex> bulbList : bulbs) {
 							Vertex bulb = bulbList.get(i);
 							if (!RayTracer.isBulbBlocked(bulb, closestLocation,
-									closestObject)) {
+									closestObject, i)) {
 								double nDotI = closestNormal
 										.normalize()
 										.dotProduct(
@@ -342,10 +379,11 @@ public class RayTracer {
 		return t;
 	}
 
-	public static boolean isSunBlocked(Vertex sun, Vector location, Object o) {
+	public static boolean isSunBlocked(Vertex sun, Vector location, Object o, int frame) {
 		Vector directionToSun = sun.getVector();
 		Ray rayToSun = new Ray(location, directionToSun);
-		for (Sphere sphere : RayTracer.spheres) {
+		for(ArrayList<Sphere> sphereList : spheres){
+			Sphere sphere = sphereList.get(frame);
 			if (sphere != o
 					&& RayTracer.RayIntersectSphere(rayToSun, sphere) > 0) {
 				return true;
@@ -359,11 +397,12 @@ public class RayTracer {
 		return false;
 	}
 
-	public static boolean isBulbBlocked(Vertex bulb, Vector location, Object o) {
+	public static boolean isBulbBlocked(Vertex bulb, Vector location, Object o, int frame) {
 		Vector directionToBulb = bulb.getVector().subtract(location);
 		Ray rayToBulb = new Ray(location, directionToBulb);
 		double tToBulb = 1;
-		for (Sphere sphere : RayTracer.spheres) {
+		for(ArrayList<Sphere> sphereList : spheres){
+			Sphere sphere = sphereList.get(frame);
 			double t = RayTracer.RayIntersectSphere(rayToBulb, sphere);
 			if (sphere != o && t > 0 && t < 1) {
 				return true;

@@ -1,0 +1,18 @@
+Text File 1:
+
+imageFormat width height numberOfFrames FileName.ext
+eye x y z
+forward x y z
+up x y z
+sun x y z r g b idNumber
+bulb x y z r g b idNumber
+sphere x y z radius r g b idNumber
+plane A B C D r g b idNumber
+
+
+Text File 2:
+
+object startFrame endFrame x y z
+eye startFrame endFrame x y z
+bulb startFrame endFrame x y z idNumber
+sphere startFrame endFrame x y z idNumber

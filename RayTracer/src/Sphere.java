@@ -2,6 +2,7 @@ public class Sphere {
 	private Vector center;
 	private Color color;
 	private double radius;
+	private int id;
 
 	// getters & setters
 	public Vector getCenter() {
@@ -10,6 +11,14 @@ public class Sphere {
 
 	public void setCenter(Vector center) {
 		this.center = center;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public Color getColor() {

@@ -5,6 +5,7 @@ public class Plane {
 	double C;
 	double D;
 	Color color;
+	int id;
 	
 	public Plane(double A, double B, double C, double D, Color color) {
 		this.A = A;
@@ -22,7 +23,47 @@ public class Plane {
 		return this.D;
 	}
 	
+	public double getA() {
+		return A;
+	}
+
+	public void setA(double a) {
+		A = a;
+	}
+
+	public double getB() {
+		return B;
+	}
+
+	public void setB(double b) {
+		B = b;
+	}
+
+	public double getC() {
+		return C;
+	}
+
+	public void setC(double c) {
+		C = c;
+	}
+
+	public void setD(double d) {
+		D = d;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
 	public Color getColor() {
 		return this.color;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }
