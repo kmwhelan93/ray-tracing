@@ -168,8 +168,8 @@ public class RayTracer {
 				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
 						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
 			}
-			for (BusStop s : sunStops) {
-				if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+			if (sunStops.size() > 0) {
+				for (BusStop s : sunStops) {
 					double t = ((double) i - s.getStartFrame())
 							/ (s.getEndFrame() - s.getStartFrame());
 					Vector sunStart = suns.get(s.getId())
@@ -190,14 +190,28 @@ public class RayTracer {
 							colorStart.getBlue() * (1 - t)
 									+ s.getColor().getBlue() * t);
 
-					Vertex sun = new Vertex(newSun, newColor);
-					sun.setId(s.getId());
-					suns.get(sun.getId()).add(sun);
+					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+
+						Vertex sun = new Vertex(newSun, newColor);
+						sun.setId(s.getId());
+						suns.get(sun.getId()).add(sun);
+					} else {
+						Vertex sun = new Vertex(sunStart, colorStart);
+						sun.setId(s.getId());
+						suns.get(sun.getId()).add(sun);
+					}
 				}
+			} else if (suns.size() > 0) {
+				Vector sunVect = suns.get(0).get(0).getVector();
+				Color color = suns.get(0).get(0).getColor();
+				Vertex sun = new Vertex(sunVect, color);
+				sun.setId(0);
+				suns.get(sun.getId()).add(sun);
+
 			}
 
-			for (BusStop b : bulbStops) {
-				if (b.getStartFrame() <= i && b.getEndFrame() >= i) {
+			if (bulbStops.size() > 0) {
+				for (BusStop b : bulbStops) {
 					double t = ((double) i - b.getStartFrame())
 							/ (b.getEndFrame() - b.getStartFrame());
 					Vector bulbStart = bulbs.get(b.getId())
@@ -217,14 +231,28 @@ public class RayTracer {
 							* (1 - t) + b.getColor().getGreen() * t,
 							colorStart.getBlue() * (1 - t)
 									+ b.getColor().getBlue() * t);
-					Vertex bulb = new Vertex(newBulb, newColor);
-					bulb.setId(b.getId());
-					bulbs.get(bulb.getId()).add(bulb);
+					if (b.getStartFrame() <= i && b.getEndFrame() >= i) {
+						Vertex bulb = new Vertex(newBulb, newColor);
+						bulb.setId(b.getId());
+						bulbs.get(bulb.getId()).add(bulb);
+					} else {
+
+						Vertex bulb = new Vertex(bulbStart, colorStart);
+						bulb.setId(b.getId());
+						bulbs.get(bulb.getId()).add(bulb);
+					}
 				}
+			} else if (bulbs.size() > 0) {
+				Vector bulbVect = bulbs.get(0).get(0).getVector();
+				Color color = bulbs.get(0).get(0).getColor();
+				Vertex bulb = new Vertex(bulbVect, color);
+				bulb.setId(0);
+				bulbs.get(bulb.getId()).add(bulb);
+
 			}
 
-			for (BusStop s : sphereStops) {
-				if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+			if (sphereStops.size() > 0) {
+				for (BusStop s : sphereStops) {
 					double t = ((double) i - s.getStartFrame())
 							/ (s.getEndFrame() - s.getStartFrame());
 					Vector sphereStart = spheres.get(s.getId())
@@ -243,11 +271,27 @@ public class RayTracer {
 							* (1 - t) + s.getColor().getGreen() * t,
 							colorStart.getBlue() * (1 - t)
 									+ s.getColor().getBlue() * t);
-					Sphere sphere = new Sphere(newSphere, spheres
-							.get(s.getId()).get(0).getRadius(), newColor);
-					sphere.setId(s.getId());
-					spheres.get(sphere.getId()).add(sphere);
+					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+						Sphere sphere = new Sphere(newSphere, spheres
+								.get(s.getId()).get(0).getRadius(), newColor);
+						sphere.setId(s.getId());
+						spheres.get(sphere.getId()).add(sphere);
+					} else {
+
+						Sphere sphere = new Sphere(sphereStart, spheres
+								.get(s.getId()).get(0).getRadius(), colorStart);
+						sphere.setId(s.getId());
+						spheres.get(sphere.getId()).add(sphere);
+					}
 				}
+			} else if (spheres.size() > 0) {
+				Vector center = spheres.get(0).get(0).getCenter();
+				double radius = spheres.get(0).get(0).getRadius();
+				Color color = spheres.get(0).get(0).getColor();
+				Sphere sphere = new Sphere(center, radius, color);
+				sphere.setId(0);
+				spheres.get(sphere.getId()).add(sphere);
+
 			}
 		}
 		for (int i = 0; i < framesNum; i++) {
