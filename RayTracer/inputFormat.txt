@@ -14,5 +14,8 @@ Text File 2:
 
 object startFrame endFrame x y z
 eye startFrame endFrame x y z
+sun startFrame endFrame x y z r g b idNumber
 bulb startFrame endFrame x y z idNumber
 sphere startFrame endFrame x y z idNumber
+
+//Currently, every frame for every object must be accounted for!

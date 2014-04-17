@@ -5,6 +5,7 @@ public class BusStop {
 	private int endFrame;
 	private Vector vector;
 	private int id;
+	private Color color;
 	
 	public BusStop(int startFrame, int endFrame, double x, double y, double z){
 		this.startFrame = startFrame;
@@ -15,6 +16,13 @@ public class BusStop {
 		this.startFrame = startFrame;
 		this.endFrame = endFrame;
 		this.vector = new Vector(x, y, z);
+		this.id = id;
+	}
+	public BusStop(int startFrame, int endFrame, double x, double y, double z, double r, double g, double b, int id){
+		this.startFrame = startFrame;
+		this.endFrame = endFrame;
+		this.vector = new Vector(x, y, z);
+		this.color = new Color(r,g,b);
 		this.id = id;
 	}
 
@@ -51,6 +59,12 @@ public class BusStop {
 
 	public void setVector(Vector vector) {
 		this.vector = vector;
+	}
+	public Color getColor() {
+		return color;
+	}
+	public void setColor(Color color) {
+		this.color = color;
 	}
 	
 

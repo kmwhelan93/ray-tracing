@@ -135,15 +135,21 @@ public class RayTracer {
 				} else if (command.equals("sun")) {
 					sunStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
-									.nextDouble(), temp.nextInt()));
+									.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextDouble(), temp
+									.nextInt()));
 				} else if (command.equals("bulb")) {
 					bulbStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
-									.nextDouble(), temp.nextInt()));
+									.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextDouble(), temp
+									.nextInt()));
 				} else if (command.equals("sphere")) {
 					sphereStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
-									.nextDouble(), temp.nextInt()));
+									.nextDouble(), temp.nextDouble(), temp
+									.nextDouble(), temp.nextDouble(), temp
+									.nextInt()));
 				}
 			}
 			temp.close();
@@ -168,6 +174,8 @@ public class RayTracer {
 							/ (s.getEndFrame() - s.getStartFrame());
 					Vector sunStart = suns.get(s.getId())
 							.get(suns.get(s.getId()).size() - 1).getVector();
+					Color colorStart = suns.get(s.getId())
+							.get(suns.get(s.getId()).size() - 1).getColor();
 					Vector v = new Vector(s.getVector().get(0)
 							- sunStart.get(0), s.getVector().get(1)
 							- sunStart.get(1), s.getVector().get(2)
@@ -175,8 +183,14 @@ public class RayTracer {
 					Vector newSun = new Vector(sunStart.get(0) + v.get(0) * t,
 							sunStart.get(1) + v.get(1) * t, sunStart.get(2)
 									+ v.get(2) * t);
-					Color color = suns.get(s.getId()).get(0).getColor();
-					Vertex sun = new Vertex(newSun, color);
+
+					Color newColor = new Color(colorStart.getRed() * (1 - t)
+							+ s.getColor().getRed() * t, colorStart.getGreen()
+							* (1 - t) + s.getColor().getGreen() * t,
+							colorStart.getBlue() * (1 - t)
+									+ s.getColor().getBlue() * t);
+
+					Vertex sun = new Vertex(newSun, newColor);
 					sun.setId(s.getId());
 					suns.get(sun.getId()).add(sun);
 				}
@@ -188,6 +202,8 @@ public class RayTracer {
 							/ (b.getEndFrame() - b.getStartFrame());
 					Vector bulbStart = bulbs.get(b.getId())
 							.get(bulbs.get(b.getId()).size() - 1).getVector();
+					Color colorStart = bulbs.get(b.getId())
+							.get(bulbs.get(b.getId()).size() - 1).getColor();
 					Vector v = new Vector(b.getVector().get(0)
 							- bulbStart.get(0), b.getVector().get(1)
 							- bulbStart.get(1), b.getVector().get(2)
@@ -196,8 +212,12 @@ public class RayTracer {
 							bulbStart.get(0) + v.get(0) * t, bulbStart.get(1)
 									+ v.get(1) * t, bulbStart.get(2) + v.get(2)
 									* t);
-					Color color = bulbs.get(b.getId()).get(0).getColor();
-					Vertex bulb = new Vertex(newBulb, color);
+					Color newColor = new Color(colorStart.getRed() * (1 - t)
+							+ b.getColor().getRed() * t, colorStart.getGreen()
+							* (1 - t) + b.getColor().getGreen() * t,
+							colorStart.getBlue() * (1 - t)
+									+ b.getColor().getBlue() * t);
+					Vertex bulb = new Vertex(newBulb, newColor);
 					bulb.setId(b.getId());
 					bulbs.get(bulb.getId()).add(bulb);
 				}
@@ -209,6 +229,8 @@ public class RayTracer {
 							/ (s.getEndFrame() - s.getStartFrame());
 					Vector sphereStart = spheres.get(s.getId())
 							.get(spheres.get(s.getId()).size() - 1).getCenter();
+					Color colorStart = spheres.get(s.getId())
+							.get(spheres.get(s.getId()).size() - 1).getColor();
 					Vector v = new Vector(s.getVector().get(0)
 							- sphereStart.get(0), s.getVector().get(1)
 							- sphereStart.get(1), s.getVector().get(2)
@@ -216,9 +238,13 @@ public class RayTracer {
 					Vector newSphere = new Vector(sphereStart.get(0) + v.get(0)
 							* t, sphereStart.get(1) + v.get(1) * t,
 							sphereStart.get(2) + v.get(2) * t);
-					Color color = spheres.get(s.getId()).get(0).getColor();
+					Color newColor = new Color(colorStart.getRed() * (1 - t)
+							+ s.getColor().getRed() * t, colorStart.getGreen()
+							* (1 - t) + s.getColor().getGreen() * t,
+							colorStart.getBlue() * (1 - t)
+									+ s.getColor().getBlue() * t);
 					Sphere sphere = new Sphere(newSphere, spheres
-							.get(s.getId()).get(0).getRadius(), color);
+							.get(s.getId()).get(0).getRadius(), newColor);
 					sphere.setId(s.getId());
 					spheres.get(sphere.getId()).add(sphere);
 				}
@@ -342,7 +368,7 @@ public class RayTracer {
 
 			scan.close();
 			String newFilename = filename.replace(".png", (i + 1) + ".png");
-			System.out.println("Drawing frame #" + (i + 1) + "...");
+			System.out.println("Drawing " + newFilename + "...");
 
 			ImageIO.write(b, "png", new File(newFilename));
 		}
@@ -379,10 +405,11 @@ public class RayTracer {
 		return t;
 	}
 
-	public static boolean isSunBlocked(Vertex sun, Vector location, Object o, int frame) {
+	public static boolean isSunBlocked(Vertex sun, Vector location, Object o,
+			int frame) {
 		Vector directionToSun = sun.getVector();
 		Ray rayToSun = new Ray(location, directionToSun);
-		for(ArrayList<Sphere> sphereList : spheres){
+		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
 			if (sphere != o
 					&& RayTracer.RayIntersectSphere(rayToSun, sphere) > 0) {
@@ -397,11 +424,12 @@ public class RayTracer {
 		return false;
 	}
 
-	public static boolean isBulbBlocked(Vertex bulb, Vector location, Object o, int frame) {
+	public static boolean isBulbBlocked(Vertex bulb, Vector location, Object o,
+			int frame) {
 		Vector directionToBulb = bulb.getVector().subtract(location);
 		Ray rayToBulb = new Ray(location, directionToBulb);
 		double tToBulb = 1;
-		for(ArrayList<Sphere> sphereList : spheres){
+		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
 			double t = RayTracer.RayIntersectSphere(rayToBulb, sphere);
 			if (sphere != o && t > 0 && t < 1) {
