@@ -17,6 +17,13 @@ public class RayTracer {
 	private static int height;
 	private static BufferedImage b;
 	private static WritableRaster r;
+	private static int maxSampleRayBounces = 10;// Number of times a sample ray
+												// is allowed to bounce in
+												// scene; can be tweaked
+	private static int numSampleRays = 2000;// Number of sample rays shot into
+											// scene after initial intersection;
+											// can be tweaked
+	private static int numFactoredSampleRays;// May move this later...
 	private static int framesNum;
 	private static Vector eye = new Vector(0, 0, 0);
 	private static ArrayList<BusStop> eyeStops = new ArrayList<BusStop>();
@@ -365,6 +372,7 @@ public class RayTracer {
 							closestColor = closestColor.invert();
 							inverted = true;
 						}
+						// TODO add Global illumination algorithm here
 
 						// apply lighting
 						// add method that takes in light vector and make a
@@ -487,5 +495,12 @@ public class RayTracer {
 			}
 		}
 		return false;
+	}
+
+	// TODO
+	// Method to compute "sample ray factor" of global lighting calculation
+	public static Color globalFactor() {
+		Color gFactor = new Color(0, 0, 0, 255);
+		return gFactor;
 	}
 }
