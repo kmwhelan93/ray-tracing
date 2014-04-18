@@ -20,11 +20,10 @@ public class RayTracer {
 	private static int maxSampleRayBounces = 10;// Number of times a sample ray
 												// is allowed to bounce in
 												// scene; can be tweaked
-	private static int numSampleRays = 2000;// Number of sample rays shot into
+	// TODO change to real number; set to one for debugging...
+	private static int numSampleRays = 1;// Number of sample rays shot into
 											// scene after initial intersection;
-											// can be tweaked
-	private static int numFactoredSampleRays = numSampleRays;// May move this
-																// later...
+	private static Color testColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
 	private static Vector eye = new Vector(0, 0, 0);
 	private static ArrayList<BusStop> eyeStops = new ArrayList<BusStop>();
@@ -367,8 +366,13 @@ public class RayTracer {
 					}
 					if (closestObject != null) {
 						// TODO add Global illumination algorithm here
-						// for each sample ray...
+						int numFactoredSampleRays = numSampleRays;
 						for (int a = 0; a < numSampleRays; a++) {
+							// generate random sample ray...
+							Color gFactor = globalFactor();
+							if(gFactor.equals(testColor)){
+								numFactoredSampleRays -= 1;
+							}
 							Color toColor = new Color(0, 0, 0, 255);
 							// might invert Color
 							boolean inverted = false;
