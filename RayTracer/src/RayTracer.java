@@ -23,7 +23,8 @@ public class RayTracer {
 	private static int numSampleRays = 2000;// Number of sample rays shot into
 											// scene after initial intersection;
 											// can be tweaked
-	private static int numFactoredSampleRays;// May move this later...
+	private static int numFactoredSampleRays = numSampleRays;// May move this
+																// later...
 	private static int framesNum;
 	private static Vector eye = new Vector(0, 0, 0);
 	private static ArrayList<BusStop> eyeStops = new ArrayList<BusStop>();
@@ -337,7 +338,7 @@ public class RayTracer {
 					Color closestColor = null;
 					Object closestObject = null;
 					Vector closestLocation = null;
-
+					// find intersections with spheres
 					for (ArrayList<Sphere> sphereList : spheres) {
 						Sphere sphere = sphereList.get(i);
 						double intersect = RayTracer.RayIntersectSphere(ray,
@@ -352,6 +353,7 @@ public class RayTracer {
 							closestLocation = location;
 						}
 					}
+					// find intersections with planes
 					for (Plane plane : planes) {
 						double intersect = RayTracer.RayIntersectPlane(ray,
 								plane);
@@ -364,56 +366,61 @@ public class RayTracer {
 						}
 					}
 					if (closestObject != null) {
-						Color toColor = new Color(0, 0, 0, 255);
-						// might invert Color
-						boolean inverted = false;
-						if (closestNormal.dotProduct(eye
-								.subtract(closestLocation)) < 0) {
-							closestColor = closestColor.invert();
-							inverted = true;
-						}
 						// TODO add Global illumination algorithm here
-
-						// apply lighting
-						// add method that takes in light vector and make a
-						// light
-						// interface
-						for (ArrayList<Vertex> sunList : suns) {
-							Vertex sun = sunList.get(i);
-							if (!RayTracer.isSunBlocked(sun, closestLocation,
-									closestObject, i)) {
-								double nDotI = closestNormal
-										.normalize()
-										.dotProduct(sun.getVector().normalize());
-								if ((nDotI > 0 && !inverted)
-										|| (inverted && nDotI < 0)) {
-									toColor = toColor.add(closestColor
-											.multiplyColors(sun.getColor())
-											.multiply(nDotI));
-								}
-
+						// for each sample ray...
+						for (int a = 0; a < numSampleRays; a++) {
+							Color toColor = new Color(0, 0, 0, 255);
+							// might invert Color
+							boolean inverted = false;
+							if (closestNormal.dotProduct(eye
+									.subtract(closestLocation)) < 0) {
+								closestColor = closestColor.invert();
+								inverted = true;
 							}
-						}
-						for (ArrayList<Vertex> bulbList : bulbs) {
-							Vertex bulb = bulbList.get(i);
-							if (!RayTracer.isBulbBlocked(bulb, closestLocation,
-									closestObject, i)) {
-								double nDotI = closestNormal
-										.normalize()
-										.dotProduct(
-												bulb.getVector()
-														.subtract(
-																closestLocation)
-														.normalize());
-								if ((nDotI > 0 && !inverted)
-										|| (inverted && nDotI < 0)) {
-									toColor = toColor.add(closestColor
-											.multiplyColors(bulb.getColor())
-											.multiply(nDotI));
+							// apply lighting
+							// add method that takes in light vector and make a
+							// light
+							// interface
+							for (ArrayList<Vertex> sunList : suns) {
+								Vertex sun = sunList.get(i);
+								if (!RayTracer.isSunBlocked(sun,
+										closestLocation, closestObject, i)) {
+									double nDotI = closestNormal
+											.normalize()
+											.dotProduct(
+													sun.getVector().normalize());
+									if ((nDotI > 0 && !inverted)
+											|| (inverted && nDotI < 0)) {
+										toColor = toColor.add(closestColor
+												.multiplyColors(sun.getColor())
+												.multiply(nDotI));
+									}
+
 								}
 							}
+							for (ArrayList<Vertex> bulbList : bulbs) {
+								Vertex bulb = bulbList.get(i);
+								if (!RayTracer.isBulbBlocked(bulb,
+										closestLocation, closestObject, i)) {
+									double nDotI = closestNormal
+											.normalize()
+											.dotProduct(
+													bulb.getVector()
+															.subtract(
+																	closestLocation)
+															.normalize());
+									if ((nDotI > 0 && !inverted)
+											|| (inverted && nDotI < 0)) {
+										toColor = toColor
+												.add(closestColor
+														.multiplyColors(
+																bulb.getColor())
+														.multiply(nDotI));
+									}
+								}
+							}
+							r.setPixel(col, row, toColor.getColorArray());
 						}
-						r.setPixel(col, row, toColor.getColorArray());
 					}
 				}
 			}
