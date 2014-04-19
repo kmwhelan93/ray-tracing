@@ -519,11 +519,14 @@ public class RayTracer {
 		return false;
 	}
 
-	// TODO I (Stephen) just cobbled this method together...how should we
+	// I (Stephen) just cobbled this method together...how should we
 	// structure our code?
-	public static Vector findIntersection(double closest, Ray ray, int frame,
-			Vector closestNormal, Color closestColor, Object closestObject,
-			Vector closestLocation) {
+	public static Vector findIntersection(Ray ray, int frame) {
+		double closest = Double.POSITIVE_INFINITY;
+		Vector closestNormal = null;
+		Color closestColor = null;
+		Object closestObject = null;
+		Vector closestLocation = null;
 		// find intersections with spheres
 		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
@@ -585,7 +588,7 @@ public class RayTracer {
 		return closestLocation;
 	}
 
-	// TODO Cobbled this method too...see above method comment
+	// Cobbled this method too...see above method comment
 	public static Color diffuseLightCalc(int i, Vector closestNormal,
 			Color closestColor, Object closestObject, Vector closestLocation) {
 		Color toColor = new Color(0, 0, 0, 255);
@@ -636,19 +639,12 @@ public class RayTracer {
 		return random;
 	}
 
-	// TODO finish this...
 	// Method to compute "sample ray factor" of global lighting calculation
 	public static Color globalFactor(Ray sampleRay, int numBounces, int frame) {
 		numBounces++;
 		if (numBounces == maxSampleRayBounces)
 			return testColor;
-		double closest = Double.POSITIVE_INFINITY;
-		Vector closestNormal = null;
-		Color closestColor = null;
-		Object closestObject = null;
-		Vector closestLocation = null;
-		Vector intersection = findIntersection(closest, sampleRay, frame,
-				closestNormal, closestColor, closestObject, closestLocation);
+		Vector intersection = findIntersection(sampleRay, frame);
 		if (intersection.getLight())
 			return intersection.getColor();
 		sampleRay = generateRandomRay(intersection);
