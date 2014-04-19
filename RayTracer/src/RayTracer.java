@@ -440,7 +440,6 @@ public class RayTracer {
 	}
 
 	public static double RayIntersectSphere(Ray ray, Sphere sphere) {
-		// origin + c*direction
 		double a = ray.getDirection().dotProduct(ray.getDirection());
 		double b = 2 * ray.getOrigin().subtract(sphere.getCenter())
 				.dotProduct(ray.getDirection());
@@ -468,6 +467,14 @@ public class RayTracer {
 				ray.getOrigin()))
 				/ plane.getNormal().dotProduct(ray.getDirection());
 		return t;
+	}
+	
+	public static double RayIntersectVertex(Ray ray, Vertex lightSource) {
+		Vector lightSourceVector = new Vector(lightSource, false);
+		Vector test = ray.getOrigin().subtract(lightSourceVector).divide(ray.getDirection());
+		if(test.get(0) == test.get(1) && test.get(0) == test.get(2) && test.get(1) == test.get(2))
+			return test.get(0);
+		return Double.POSITIVE_INFINITY;
 	}
 
 	public static boolean isSunBlocked(Vertex sun, Vector location, Object o,
@@ -512,12 +519,12 @@ public class RayTracer {
 
 	// TODO I (Stephen) just cobbled this method together...how should we
 	// structure our code?
-	public static Vector findIntersection(double closest, Ray ray, int i,
+	public static Vector findIntersection(double closest, Ray ray, int frame,
 			Vector closestNormal, Color closestColor, Object closestObject,
 			Vector closestLocation) {
 		// find intersections with spheres
 		for (ArrayList<Sphere> sphereList : spheres) {
-			Sphere sphere = sphereList.get(i);
+			Sphere sphere = sphereList.get(frame);
 			double intersect = RayTracer.RayIntersectSphere(ray, sphere);
 			if (intersect >= 0 && intersect < closest) {
 				closest = intersect;
@@ -537,6 +544,31 @@ public class RayTracer {
 				closestColor = plane.getColor();
 				closestObject = plane;
 				closestLocation = ray.scale(intersect);
+			}
+		}
+		// find intersections with lights
+		for (ArrayList<Vertex> sunList: suns) {
+			Vertex sun = sunList.get(frame);
+			double intersect = RayTracer.RayIntersectVertex(ray, sun);
+			if (intersect >= 0 && intersect < closest) {
+				closest = intersect;
+				closestNormal = sun.getNormal().normalize();
+				closestColor = sun.getColor();
+				closestObject = sun;
+				closestLocation = ray.scale(intersect);
+				closestLocation.setLight(true);
+			}
+		}
+		for (ArrayList<Vertex> bulbList: bulbs) {
+			Vertex bulb = bulbList.get(frame);
+			double intersect = RayTracer.RayIntersectVertex(ray, bulb);
+			if (intersect >= 0 && intersect < closest) {
+				closest = intersect;
+				closestNormal = bulb.getNormal().normalize();
+				closestColor = bulb.getColor();
+				closestObject = bulb;
+				closestLocation = ray.scale(intersect);
+				closestLocation.setLight(true);
 			}
 		}
 		return closestLocation;
@@ -608,7 +640,7 @@ public class RayTracer {
 
 	// TODO finish this...
 	// Method to compute "sample ray factor" of global lighting calculation
-	public static Color globalFactor(Ray sampleRay, int numBounces, int i) {
+	public static Color globalFactor(Ray sampleRay, int numBounces, int frame) {
 		numBounces++;
 		if (numBounces == maxSampleRayBounces)
 			return testColor;
@@ -617,13 +649,14 @@ public class RayTracer {
 		Color closestColor = null;
 		Object closestObject = null;
 		Vector closestLocation = null;
-		Vector intersection = findIntersection(closest, sampleRay, i,
+		Vector intersection = findIntersection(closest, sampleRay, frame,
 				closestNormal, closestColor, closestObject, closestLocation);
-		// if(intersection is a light)
-		// return light intensity (color?)
+		 if(intersection.getLight())
+			 return null;
 		sampleRay = generateRandomRay(intersection);
-		Color gFactor = globalFactor(sampleRay, numBounces, i);// recursively shoot rays into scene
-		Color diffuse = diffuseLightCalc(i, closestNormal, closestColor, closestObject, closestLocation);
+		Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively shoot rays into scene
+		//not going to work yet...
+		Color diffuse = diffuseLightCalc(frame, closestNormal, closestColor, closestObject, closestLocation);
 		gFactor.multiplyColors(diffuse);
 		return gFactor;
 	}
