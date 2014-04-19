@@ -1,7 +1,11 @@
 import java.text.DecimalFormat;
 import java.util.Arrays;
 
+
 public class Vector extends Matrix {
+	
+	boolean isLight = false;
+	
 	public Vector(double... values) {
 		matrix = new double[values.length][1];
 		for (int i = 0; i < values.length; i++) {
@@ -31,6 +35,15 @@ public class Vector extends Matrix {
 	public void set(int index, double value) {
 		this.matrix[index][0] = value;
 	}
+	
+	public void setLight(boolean value) {
+		this.isLight = value;
+	}
+	
+	public boolean getLight() {
+		return this.isLight;
+	}
+	
 	public double dotProduct(Vector v) {
 		double sum = 0;
 		for (int i = 0; i < this.size(); i++) {
@@ -69,6 +82,7 @@ public class Vector extends Matrix {
 		}
 		return result;
 	}
+	
 	public Vector subtract(Vector v) {
 		Vector result = new Vector(v.size());
 		/* removed because its annoying
@@ -80,6 +94,15 @@ public class Vector extends Matrix {
 		}
 		return result;
 	}
+	
+	public Vector divide(Vector v) {
+		Vector result = new Vector(v.size());
+		for (int i = 0; i < this.size(); i ++) {
+			result.set(i, this.get(i) / v.get(i));
+		}
+		return result;
+	}
+	
 	public Vector scale(double factor) {
 		Vector result = new Vector(this.size());
 		for (int i = 0; i < this.size(); i++) {
