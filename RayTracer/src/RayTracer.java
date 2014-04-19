@@ -541,6 +541,60 @@ public class RayTracer {
 		}
 		return closestLocation;
 	}
+	//TODO Cobbled this method too...see above method comment
+	public static Color diffuseLightCalc(int i, Vector closestNormal, Color closestColor, Object closestObject, Vector closestLocation) {
+		Color toColor = new Color(0, 0, 0, 255);
+		// might invert Color
+		boolean inverted = false;
+		if (closestNormal.dotProduct(eye
+				.subtract(closestLocation)) < 0) {
+			closestColor = closestColor.invert();
+			inverted = true;
+		}
+		// apply lighting
+		// add method that takes in light vector and make a
+		// light
+		// interface
+		for (ArrayList<Vertex> sunList : suns) {
+			Vertex sun = sunList.get(i);
+			if (!RayTracer.isSunBlocked(sun,
+					closestLocation, closestObject, i)) {
+				double nDotI = closestNormal
+						.normalize()
+						.dotProduct(
+								sun.getVector().normalize());
+				if ((nDotI > 0 && !inverted)
+						|| (inverted && nDotI < 0)) {
+					toColor = toColor.add(closestColor
+							.multiplyColors(sun.getColor())
+							.multiply(nDotI));
+				}
+
+			}
+		}
+		for (ArrayList<Vertex> bulbList : bulbs) {
+			Vertex bulb = bulbList.get(i);
+			if (!RayTracer.isBulbBlocked(bulb,
+					closestLocation, closestObject, i)) {
+				double nDotI = closestNormal
+						.normalize()
+						.dotProduct(
+								bulb.getVector()
+										.subtract(
+												closestLocation)
+										.normalize());
+				if ((nDotI > 0 && !inverted)
+						|| (inverted && nDotI < 0)) {
+					toColor = toColor
+							.add(closestColor
+									.multiplyColors(
+											bulb.getColor())
+									.multiply(nDotI));
+				}
+			}
+		}
+		return toColor;
+	}
 
 	public static Ray generateRandomRay(Vector location) {
 		double theta = Math.toRadians(Math.random() * 90);
@@ -569,7 +623,8 @@ public class RayTracer {
 		// return light intensity (color?)
 		sampleRay = generateRandomRay(intersection);
 		Color gFactor = globalFactor(sampleRay, numBounces, i);// recursively shoot rays into scene
-		// should return diffuse(intersection) * factor
+		Color diffuse = diffuseLightCalc(i, closestNormal, closestColor, closestObject, closestLocation);
+		gFactor.multiplyColors(diffuse);
 		return gFactor;
 	}
 }
