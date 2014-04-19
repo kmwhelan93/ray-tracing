@@ -5,6 +5,7 @@ import java.util.Arrays;
 public class Vector extends Matrix {
 	
 	boolean isLight = false;
+	Color lightColor;
 	
 	public Vector(double... values) {
 		matrix = new double[values.length][1];
@@ -38,6 +39,13 @@ public class Vector extends Matrix {
 	
 	public void setLight(boolean value) {
 		this.isLight = value;
+	}
+	
+	public Color getColor() {
+		return this.lightColor;
+	}
+	public void setColor(Color color) {
+		this.lightColor = color;
 	}
 	
 	public boolean getLight() {
