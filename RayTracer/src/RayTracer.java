@@ -370,10 +370,10 @@ public class RayTracer {
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
 						for (int a = 0; a < numSampleRays; a++) {
+							Ray currentSampleRay = RayTracer.generateRandomRay(closestLocation);
 							// TODO fix next 2 lines...
-							RayTracer.generateRandomRay();
+							int currentSampleNumBounces = 0;
 							Color gFactor = globalFactor();
-							
 							if(gFactor.equals(testColor)){
 								numFactoredSampleRays -= 1;
 								continue;
@@ -514,15 +514,15 @@ public class RayTracer {
 		}
 		return false;
 	}
-	//TODO fix this method
-	public static Ray generateRandomRay() {
+	
+	public static Ray generateRandomRay(Vector location) {
 		double theta = Math.toRadians(Math.random() * 90);
 		double phi = Math.toRadians(Math.random() * 360);
 		double x = Math.toDegrees(Math.sin(phi) * Math.cos(theta));
 		double y = Math.toDegrees(Math.sin(phi) * Math.sin(theta));
 		double z = Math.toDegrees(Math.cos(phi));
-		//Ray random = new Ray();
-		return null;
+		Ray random = new Ray(location, new Vector(x, y, z));
+		return random;
 	}
 
 	// TODO finish this...
