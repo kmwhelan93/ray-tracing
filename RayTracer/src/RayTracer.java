@@ -368,7 +368,7 @@ public class RayTracer {
 									.generateRandomRay(closestLocation);
 							int currentSampleNumBounces = 0;
 							Color gFactor = globalFactor(currentSampleRay,
-									currentSampleNumBounces);
+									currentSampleNumBounces, i);
 							if (gFactor.equals(testColor)) {
 								numFactoredSampleRays -= 1;
 								continue;
@@ -510,6 +510,38 @@ public class RayTracer {
 		return false;
 	}
 
+	// TODO I (Stephen) just cobbled this method together...how should we
+	// structure our code?
+	public static Vector findIntersection(double closest, Ray ray, int i,
+			Vector closestNormal, Color closestColor, Object closestObject,
+			Vector closestLocation) {
+		// find intersections with spheres
+		for (ArrayList<Sphere> sphereList : spheres) {
+			Sphere sphere = sphereList.get(i);
+			double intersect = RayTracer.RayIntersectSphere(ray, sphere);
+			if (intersect >= 0 && intersect < closest) {
+				closest = intersect;
+				Vector location = ray.scale(intersect);
+				closestNormal = sphere.getNormal(location).normalize();
+				closestColor = sphere.getColor();
+				closestObject = sphere;
+				closestLocation = location;
+			}
+		}
+		// find intersections with planes
+		for (Plane plane : planes) {
+			double intersect = RayTracer.RayIntersectPlane(ray, plane);
+			if (intersect >= 0 && intersect < closest) {
+				closest = intersect;
+				closestNormal = plane.getNormal().normalize();
+				closestColor = plane.getColor();
+				closestObject = plane;
+				closestLocation = ray.scale(intersect);
+			}
+		}
+		return closestLocation;
+	}
+
 	public static Ray generateRandomRay(Vector location) {
 		double theta = Math.toRadians(Math.random() * 90);
 		double phi = Math.toRadians(Math.random() * 360);
@@ -522,10 +554,22 @@ public class RayTracer {
 
 	// TODO finish this...
 	// Method to compute "sample ray factor" of global lighting calculation
-	public static Color globalFactor(Ray sample, int numBounces) {
-		Color gFactor = new Color(0, 0, 0, 255);
+	public static Color globalFactor(Ray sampleRay, int numBounces, int i) {
+		numBounces++;
 		if (numBounces == maxSampleRayBounces)
-			return gFactor;
+			return testColor;
+		double closest = Double.POSITIVE_INFINITY;
+		Vector closestNormal = null;
+		Color closestColor = null;
+		Object closestObject = null;
+		Vector closestLocation = null;
+		Vector intersection = findIntersection(closest, sampleRay, i,
+				closestNormal, closestColor, closestObject, closestLocation);
+		// if(intersection is a light)
+		// return light intensity (color?)
+		sampleRay = generateRandomRay(intersection);
+		Color gFactor = globalFactor(sampleRay, numBounces, i);// recursively shoot rays into scene
+		// should return diffuse(intersection) * factor
 		return gFactor;
 	}
 }
