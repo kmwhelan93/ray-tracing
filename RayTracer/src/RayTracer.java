@@ -367,8 +367,10 @@ public class RayTracer {
 							Ray currentSampleRay = RayTracer
 									.generateRandomRay(closestLocation);
 							int currentSampleNumBounces = 0;
-							Color gFactor = globalFactor(currentSampleRay,
-									currentSampleNumBounces, i);
+							Color gFactor = new Color(1, 1, 1, 255);
+							// FIXME
+							//Color gFactor = globalFactor(currentSampleRay,
+								//	currentSampleNumBounces, i);
 							if (gFactor.equals(testColor)) {
 								numFactoredSampleRays -= 1;
 								continue;
@@ -526,7 +528,8 @@ public class RayTracer {
 		Vector closestNormal = null;
 		Color closestColor = null;
 		Object closestObject = null;
-		Vector closestLocation = null;
+		Vector closestLocation = new Vector();
+		closestLocation.setLight(false);
 		// find intersections with spheres
 		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
@@ -540,6 +543,7 @@ public class RayTracer {
 				closestLocation = location;
 				closestLocation.setClosestNormal(closestNormal);
 				closestLocation.setClosestObject(closestObject);
+				closestLocation.setLight(false);
 			}
 		}
 		// find intersections with planes
@@ -553,6 +557,7 @@ public class RayTracer {
 				closestLocation = ray.scale(intersect);
 				closestLocation.setClosestNormal(closestNormal);
 				closestLocation.setClosestObject(closestObject);
+				closestLocation.setLight(false);
 			}
 		}
 		// find intersections with lights
