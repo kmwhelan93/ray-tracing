@@ -1,18 +1,12 @@
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
 public class RayTracer {
-
-	/**
-	 * @param args
-	 * @throws IOException
-	 */
 	private static int width;
 	private static int height;
 	private static BufferedImage b;
@@ -370,11 +364,12 @@ public class RayTracer {
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
 						for (int a = 0; a < numSampleRays; a++) {
-							Ray currentSampleRay = RayTracer.generateRandomRay(closestLocation);
-							// TODO fix next 2 lines...
+							Ray currentSampleRay = RayTracer
+									.generateRandomRay(closestLocation);
 							int currentSampleNumBounces = 0;
-							Color gFactor = globalFactor();
-							if(gFactor.equals(testColor)){
+							Color gFactor = globalFactor(currentSampleRay,
+									currentSampleNumBounces);
+							if (gFactor.equals(testColor)) {
 								numFactoredSampleRays -= 1;
 								continue;
 							}
@@ -498,7 +493,7 @@ public class RayTracer {
 			int frame) {
 		Vector directionToBulb = bulb.getVector().subtract(location);
 		Ray rayToBulb = new Ray(location, directionToBulb);
-		double tToBulb = 1;
+		// double tToBulb = 1;
 		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
 			double t = RayTracer.RayIntersectSphere(rayToBulb, sphere);
@@ -514,7 +509,7 @@ public class RayTracer {
 		}
 		return false;
 	}
-	
+
 	public static Ray generateRandomRay(Vector location) {
 		double theta = Math.toRadians(Math.random() * 90);
 		double phi = Math.toRadians(Math.random() * 360);
@@ -527,10 +522,10 @@ public class RayTracer {
 
 	// TODO finish this...
 	// Method to compute "sample ray factor" of global lighting calculation
-	public static Color globalFactor() {
+	public static Color globalFactor(Ray sample, int numBounces) {
 		Color gFactor = new Color(0, 0, 0, 255);
-		//if(maxSampleRayBounces)
-			//return gFactor;
+		if (numBounces == maxSampleRayBounces)
+			return gFactor;
 		return gFactor;
 	}
 }
