@@ -535,6 +535,8 @@ public class RayTracer {
 				closestColor = sphere.getColor();
 				closestObject = sphere;
 				closestLocation = location;
+				closestLocation.setClosestNormal(closestNormal);
+				closestLocation.setClosestObject(closestObject);
 			}
 		}
 		// find intersections with planes
@@ -546,6 +548,8 @@ public class RayTracer {
 				closestColor = plane.getColor();
 				closestObject = plane;
 				closestLocation = ray.scale(intersect);
+				closestLocation.setClosestNormal(closestNormal);
+				closestLocation.setClosestObject(closestObject);
 			}
 		}
 		// find intersections with lights
@@ -560,6 +564,8 @@ public class RayTracer {
 				closestLocation = ray.scale(intersect);
 				closestLocation.setLight(true);
 				closestLocation.setColor(closestColor);
+				closestLocation.setClosestNormal(closestNormal);
+				closestLocation.setClosestObject(closestObject);
 			}
 		}
 		for (ArrayList<Vertex> bulbList : bulbs) {
@@ -572,6 +578,8 @@ public class RayTracer {
 				closestObject = bulb;
 				closestLocation = ray.scale(intersect);
 				closestLocation.setLight(true);
+				closestLocation.setClosestNormal(closestNormal);
+				closestLocation.setClosestObject(closestObject);
 			}
 		}
 		return closestLocation;
@@ -645,9 +653,8 @@ public class RayTracer {
 			return intersection.getColor();
 		sampleRay = generateRandomRay(intersection);
 		Color gFactor = globalFactor(sampleRay, numBounces, frame);//recursively shoot rays into scene
-		// not going to work yet...
-		Color diffuse = diffuseLightCalc(frame, closestNormal, closestColor,
-				closestObject, closestLocation);
+		Color diffuse = diffuseLightCalc(frame, intersection.getClosestNormal(), intersection.getColor(),
+				intersection.getClosestObject(), intersection);
 		gFactor.multiplyColors(diffuse);
 		return gFactor;
 	}
