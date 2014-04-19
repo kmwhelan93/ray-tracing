@@ -365,15 +365,19 @@ public class RayTracer {
 						}
 					}
 					if (closestObject != null) {
-						// TODO add Global illumination algorithm here
+						// Global illumination algorithm starts here
 						int numFactoredSampleRays = numSampleRays;
+						Color sumColor = new Color(0, 0, 0, 255);
+						Color toColor = new Color(0, 0, 0, 255);
 						for (int a = 0; a < numSampleRays; a++) {
-							// generate random sample ray...
+							// TODO fix next 2 lines...
+							RayTracer.generateRandomRay();
 							Color gFactor = globalFactor();
+							
 							if(gFactor.equals(testColor)){
 								numFactoredSampleRays -= 1;
+								continue;
 							}
-							Color toColor = new Color(0, 0, 0, 255);
 							// might invert Color
 							boolean inverted = false;
 							if (closestNormal.dotProduct(eye
@@ -423,8 +427,11 @@ public class RayTracer {
 									}
 								}
 							}
-							r.setPixel(col, row, toColor.getColorArray());
+							toColor.multiplyColors(gFactor);
+							sumColor.add(toColor);
 						}
+						sumColor.divide(numFactoredSampleRays);
+						r.setPixel(col, row, toColor.getColorArray());
 					}
 				}
 			}
@@ -507,8 +514,18 @@ public class RayTracer {
 		}
 		return false;
 	}
+	//TODO fix this method
+	public static Ray generateRandomRay() {
+		double theta = Math.toRadians(Math.random() * 90);
+		double phi = Math.toRadians(Math.random() * 360);
+		double x = Math.toDegrees(Math.sin(phi) * Math.cos(theta));
+		double y = Math.toDegrees(Math.sin(phi) * Math.sin(theta));
+		double z = Math.toDegrees(Math.cos(phi));
+		//Ray random = new Ray();
+		return null;
+	}
 
-	// TODO
+	// TODO finish this...
 	// Method to compute "sample ray factor" of global lighting calculation
 	public static Color globalFactor() {
 		Color gFactor = new Color(0, 0, 0, 255);
