@@ -468,11 +468,13 @@ public class RayTracer {
 				/ plane.getNormal().dotProduct(ray.getDirection());
 		return t;
 	}
-	
+
 	public static double RayIntersectVertex(Ray ray, Vertex lightSource) {
 		Vector lightSourceVector = new Vector(lightSource, false);
-		Vector test = ray.getOrigin().subtract(lightSourceVector).divide(ray.getDirection());
-		if(test.get(0) == test.get(1) && test.get(0) == test.get(2) && test.get(1) == test.get(2))
+		Vector test = ray.getOrigin().subtract(lightSourceVector)
+				.divide(ray.getDirection());
+		if (test.get(0) == test.get(1) && test.get(0) == test.get(2)
+				&& test.get(1) == test.get(2))
 			return test.get(0);
 		return Double.POSITIVE_INFINITY;
 	}
@@ -547,7 +549,7 @@ public class RayTracer {
 			}
 		}
 		// find intersections with lights
-		for (ArrayList<Vertex> sunList: suns) {
+		for (ArrayList<Vertex> sunList : suns) {
 			Vertex sun = sunList.get(frame);
 			double intersect = RayTracer.RayIntersectVertex(ray, sun);
 			if (intersect >= 0 && intersect < closest) {
@@ -557,9 +559,10 @@ public class RayTracer {
 				closestObject = sun;
 				closestLocation = ray.scale(intersect);
 				closestLocation.setLight(true);
+				closestLocation.setColor(closestColor);
 			}
 		}
-		for (ArrayList<Vertex> bulbList: bulbs) {
+		for (ArrayList<Vertex> bulbList : bulbs) {
 			Vertex bulb = bulbList.get(frame);
 			double intersect = RayTracer.RayIntersectVertex(ray, bulb);
 			if (intersect >= 0 && intersect < closest) {
@@ -573,13 +576,14 @@ public class RayTracer {
 		}
 		return closestLocation;
 	}
-	//TODO Cobbled this method too...see above method comment
-	public static Color diffuseLightCalc(int i, Vector closestNormal, Color closestColor, Object closestObject, Vector closestLocation) {
+
+	// TODO Cobbled this method too...see above method comment
+	public static Color diffuseLightCalc(int i, Vector closestNormal,
+			Color closestColor, Object closestObject, Vector closestLocation) {
 		Color toColor = new Color(0, 0, 0, 255);
 		// might invert Color
 		boolean inverted = false;
-		if (closestNormal.dotProduct(eye
-				.subtract(closestLocation)) < 0) {
+		if (closestNormal.dotProduct(eye.subtract(closestLocation)) < 0) {
 			closestColor = closestColor.invert();
 			inverted = true;
 		}
@@ -589,39 +593,25 @@ public class RayTracer {
 		// interface
 		for (ArrayList<Vertex> sunList : suns) {
 			Vertex sun = sunList.get(i);
-			if (!RayTracer.isSunBlocked(sun,
-					closestLocation, closestObject, i)) {
-				double nDotI = closestNormal
-						.normalize()
-						.dotProduct(
-								sun.getVector().normalize());
-				if ((nDotI > 0 && !inverted)
-						|| (inverted && nDotI < 0)) {
-					toColor = toColor.add(closestColor
-							.multiplyColors(sun.getColor())
-							.multiply(nDotI));
+			if (!RayTracer.isSunBlocked(sun, closestLocation, closestObject, i)) {
+				double nDotI = closestNormal.normalize().dotProduct(
+						sun.getVector().normalize());
+				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
+					toColor = toColor.add(closestColor.multiplyColors(
+							sun.getColor()).multiply(nDotI));
 				}
 
 			}
 		}
 		for (ArrayList<Vertex> bulbList : bulbs) {
 			Vertex bulb = bulbList.get(i);
-			if (!RayTracer.isBulbBlocked(bulb,
-					closestLocation, closestObject, i)) {
-				double nDotI = closestNormal
-						.normalize()
-						.dotProduct(
-								bulb.getVector()
-										.subtract(
-												closestLocation)
-										.normalize());
-				if ((nDotI > 0 && !inverted)
-						|| (inverted && nDotI < 0)) {
-					toColor = toColor
-							.add(closestColor
-									.multiplyColors(
-											bulb.getColor())
-									.multiply(nDotI));
+			if (!RayTracer.isBulbBlocked(bulb, closestLocation, closestObject,
+					i)) {
+				double nDotI = closestNormal.normalize().dotProduct(
+						bulb.getVector().subtract(closestLocation).normalize());
+				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
+					toColor = toColor.add(closestColor.multiplyColors(
+							bulb.getColor()).multiply(nDotI));
 				}
 			}
 		}
@@ -651,12 +641,13 @@ public class RayTracer {
 		Vector closestLocation = null;
 		Vector intersection = findIntersection(closest, sampleRay, frame,
 				closestNormal, closestColor, closestObject, closestLocation);
-		 if(intersection.getLight())
-			 return null;
+		if (intersection.getLight())
+			return intersection.getColor();
 		sampleRay = generateRandomRay(intersection);
-		Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively shoot rays into scene
-		//not going to work yet...
-		Color diffuse = diffuseLightCalc(frame, closestNormal, closestColor, closestObject, closestLocation);
+		Color gFactor = globalFactor(sampleRay, numBounces, frame);//recursively shoot rays into scene
+		// not going to work yet...
+		Color diffuse = diffuseLightCalc(frame, closestNormal, closestColor,
+				closestObject, closestLocation);
 		gFactor.multiplyColors(diffuse);
 		return gFactor;
 	}
