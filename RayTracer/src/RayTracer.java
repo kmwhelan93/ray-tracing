@@ -529,6 +529,8 @@ public class RayTracer {
 	// Method to compute "sample ray factor" of global lighting calculation
 	public static Color globalFactor() {
 		Color gFactor = new Color(0, 0, 0, 255);
+		//if(maxSampleRayBounces)
+			//return gFactor;
 		return gFactor;
 	}
 }
