@@ -367,10 +367,10 @@ public class RayTracer {
 							Ray currentSampleRay = RayTracer
 									.generateRandomRay(closestLocation);
 							int currentSampleNumBounces = 0;
-							//Color gFactor = new Color(1, 1, 1, 255);
+							Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
-							Color gFactor = globalFactor(currentSampleRay,
-									currentSampleNumBounces, i);
+							//Color gFactor = globalFactor(currentSampleRay,
+								//	currentSampleNumBounces, i);
 							if (gFactor.equals(testColor)) {
 								numFactoredSampleRays -= 1;
 								continue;
