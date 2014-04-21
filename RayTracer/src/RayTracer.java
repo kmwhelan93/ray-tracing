@@ -118,6 +118,16 @@ public class RayTracer {
 							temp.nextDouble(), temp.nextDouble());
 					Plane plane = new Plane(A, B, C, D, color);
 					planes.add(plane);
+				} else if (command.equals("planeT")) {
+					//planeT id filename
+					int id = temp.nextInt();
+					String texture = temp.next();
+					planes.get(id).setTexture(texture);
+				} else if (command.equals("sphereT")) {
+					//sphereT id filename
+					int id = temp.nextInt();
+					String texture = temp.next();
+					spheres.get(id).get(0).setTexture(texture);
 				}
 			}
 			temp.close();
@@ -184,7 +194,6 @@ public class RayTracer {
 					Vector newSun = new Vector(sunStart.get(0) + v.get(0) * t,
 							sunStart.get(1) + v.get(1) * t, sunStart.get(2)
 									+ v.get(2) * t);
-
 					Color newColor = new Color(colorStart.getRed() * (1 - t)
 							+ s.getColor().getRed() * t, colorStart.getGreen()
 							* (1 - t) + s.getColor().getGreen() * t,
@@ -259,7 +268,7 @@ public class RayTracer {
 					Vector sphereStart = spheres.get(s.getId())
 							.get(spheres.get(s.getId()).size() - 1).getCenter();
 					Color colorStart = spheres.get(s.getId())
-							.get(spheres.get(s.getId()).size() - 1).getColor();
+							.get(spheres.get(s.getId()).size() - 1).getColor(null);
 					Vector v = new Vector(s.getVector().get(0)
 							- sphereStart.get(0), s.getVector().get(1)
 							- sphereStart.get(1), s.getVector().get(2)
@@ -275,20 +284,26 @@ public class RayTracer {
 					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
 						Sphere sphere = new Sphere(newSphere, spheres
 								.get(s.getId()).get(0).getRadius(), newColor);
-						sphere.setId(s.getId());
+						sphere.setId(spheres
+								.get(s.getId()).get(0).getId());
+						sphere.setTexture(spheres
+								.get(s.getId()).get(0).getTexture());
 						spheres.get(sphere.getId()).add(sphere);
 					} else {
 
 						Sphere sphere = new Sphere(sphereStart, spheres
 								.get(s.getId()).get(0).getRadius(), colorStart);
-						sphere.setId(s.getId());
+						sphere.setId(spheres
+								.get(s.getId()).get(0).getId());
+						sphere.setTexture(spheres
+								.get(s.getId()).get(0).getTexture());
 						spheres.get(sphere.getId()).add(sphere);
 					}
 				}
 			} else if (spheres.size() > 0) {
 				Vector center = spheres.get(0).get(0).getCenter();
 				double radius = spheres.get(0).get(0).getRadius();
-				Color color = spheres.get(0).get(0).getColor();
+				Color color = spheres.get(0).get(0).getColor(null);
 				Sphere sphere = new Sphere(center, radius, color);
 				sphere.setId(0);
 				spheres.get(sphere.getId()).add(sphere);
@@ -341,7 +356,7 @@ public class RayTracer {
 							Vector location = ray.scale(intersect);
 							closestNormal = sphere.getNormal(location)
 									.normalize();
-							closestColor = sphere.getColor();
+							closestColor = sphere.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
 							closestObject = sphere;
 							closestLocation = location;
 						}
@@ -538,7 +553,7 @@ public class RayTracer {
 				closest = intersect;
 				Vector location = ray.scale(intersect);
 				closestNormal = sphere.getNormal(location).normalize();
-				closestColor = sphere.getColor();
+				closestColor = sphere.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
 				closestObject = sphere;
 				closestLocation = location;
 				closestLocation.setClosestNormal(closestNormal);

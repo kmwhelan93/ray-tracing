@@ -1,3 +1,9 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 
 public class Plane {
 	double A;
@@ -5,6 +11,7 @@ public class Plane {
 	double C;
 	double D;
 	Color color;
+	BufferedImage texture;
 	int id;
 	
 	public Plane(double A, double B, double C, double D, Color color) {
@@ -13,6 +20,7 @@ public class Plane {
 		this.C = C;
 		this.D = D;
 		this.color = color;
+		this.texture = null;
 	}
 	
 	public Vector getNormal() {
@@ -55,8 +63,17 @@ public class Plane {
 		this.color = color;
 	}
 
+	//TODO combine these getColor methods
 	public Color getColor() {
 		return this.color;
+	}
+
+	public Color getColor(double x, double y, double depth) {
+		if (texture == null)
+			return this.color;
+		int rgb = texture.getRGB((int)(x % texture.getWidth()), (int)(y % texture.getHeight()));
+		return new Color((rgb >> 16) & 0xff,
+				(rgb >> 8) & 0xff, (rgb) & 0xff);
 	}
 
 	public int getId() {
@@ -65,5 +82,13 @@ public class Plane {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public void setTexture(String filename) {
+		try {
+			texture = ImageIO.read(new File(filename));
+		} catch (IOException e) {
+			System.out.println("Error reading texture file");
+		}
 	}
 }
