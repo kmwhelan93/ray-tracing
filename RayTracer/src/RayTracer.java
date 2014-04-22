@@ -25,10 +25,8 @@ public class RayTracer {
 	private static Vector forward = new Vector(0, 0, -1);
 	private static Vector right = new Vector(1, 0, 0);
 	private static Vector up = new Vector(0, 1, 0);
-	private static ArrayList<ArrayList<Vertex>> suns = new ArrayList<ArrayList<Vertex>>();
-	private static ArrayList<BusStop> sunStops = new ArrayList<BusStop>();
-	private static ArrayList<ArrayList<Vertex>> bulbs = new ArrayList<ArrayList<Vertex>>();
-	private static ArrayList<BusStop> bulbStops = new ArrayList<BusStop>();
+	private static ArrayList<Light> lights = new ArrayList<Light>();
+	private static ArrayList<BusStop> lightStops = new ArrayList<BusStop>();
 	private static ArrayList<ArrayList<Sphere>> spheres = new ArrayList<ArrayList<Sphere>>();
 	private static ArrayList<BusStop> sphereStops = new ArrayList<BusStop>();
 	private static ArrayList<Plane> planes = new ArrayList<Plane>();
@@ -77,12 +75,11 @@ public class RayTracer {
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
 					int id = temp.nextInt();
-					Vertex sun = new Vertex(v, color);
-					sun.setId(id);
-					if (id >= suns.size()) {
-						suns.add(new ArrayList<Vertex>());
+					Sun sun = new Sun(id, v, color);
+					while (id >= lights.size()) {
+						lights.add(null);
 					}
-					suns.get(id).add(sun);
+					lights.set(id, sun);
 				} else if (command.equals("bulb")) {
 					double x = temp.nextDouble();
 					double y = temp.nextDouble();
@@ -90,12 +87,12 @@ public class RayTracer {
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
 					int id = temp.nextInt();
-					Vertex bulb = new Vertex(x, y, z, color);
-					bulb.setId(id);
-					if (id >= bulbs.size()) {
-						bulbs.add(new ArrayList<Vertex>());
+					Vector location = new Vector(x, y, z);
+					Bulb bulb = new Bulb(id, location, color);
+					while (id >= lights.size()) {
+						lights.add(null);
 					}
-					bulbs.get(id).add(bulb);
+					lights.set(id, bulb);
 				} else if (command.equals("sphere")) {
 					Vector v = new Vector(temp.nextDouble(), temp.nextDouble(),
 							temp.nextDouble());
@@ -143,14 +140,8 @@ public class RayTracer {
 					eyeStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
 									.nextDouble()));
-				} else if (command.equals("sun")) {
-					sunStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
-							temp.nextDouble(), temp.nextDouble(), temp
-									.nextDouble(), temp.nextDouble(), temp
-									.nextDouble(), temp.nextDouble(), temp
-									.nextInt()));
-				} else if (command.equals("bulb")) {
-					bulbStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
+				} else if (command.equals("sun") || command.equals("bulb")) {
+					lightStops.add(new BusStop(temp.nextInt(), temp.nextInt(),
 							temp.nextDouble(), temp.nextDouble(), temp
 									.nextDouble(), temp.nextDouble(), temp
 									.nextDouble(), temp.nextDouble(), temp
@@ -179,87 +170,7 @@ public class RayTracer {
 				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
 						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
 			}
-			if (sunStops.size() > 0) {
-				for (BusStop s : sunStops) {
-					double t = ((double) i - s.getStartFrame())
-							/ (s.getEndFrame() - s.getStartFrame());
-					Vector sunStart = suns.get(s.getId())
-							.get(suns.get(s.getId()).size() - 1).getVector();
-					Color colorStart = suns.get(s.getId())
-							.get(suns.get(s.getId()).size() - 1).getColor();
-					Vector v = new Vector(s.getVector().get(0)
-							- sunStart.get(0), s.getVector().get(1)
-							- sunStart.get(1), s.getVector().get(2)
-							- sunStart.get(2));
-					Vector newSun = new Vector(sunStart.get(0) + v.get(0) * t,
-							sunStart.get(1) + v.get(1) * t, sunStart.get(2)
-									+ v.get(2) * t);
-					Color newColor = new Color(colorStart.getRed() * (1 - t)
-							+ s.getColor().getRed() * t, colorStart.getGreen()
-							* (1 - t) + s.getColor().getGreen() * t,
-							colorStart.getBlue() * (1 - t)
-									+ s.getColor().getBlue() * t);
-
-					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
-
-						Vertex sun = new Vertex(newSun, newColor);
-						sun.setId(s.getId());
-						suns.get(sun.getId()).add(sun);
-					} else {
-						Vertex sun = new Vertex(sunStart, colorStart);
-						sun.setId(s.getId());
-						suns.get(sun.getId()).add(sun);
-					}
-				}
-			} else if (suns.size() > 0) {
-				Vector sunVect = suns.get(0).get(0).getVector();
-				Color color = suns.get(0).get(0).getColor();
-				Vertex sun = new Vertex(sunVect, color);
-				sun.setId(0);
-				suns.get(sun.getId()).add(sun);
-
-			}
-
-			if (bulbStops.size() > 0) {
-				for (BusStop b : bulbStops) {
-					double t = ((double) i - b.getStartFrame())
-							/ (b.getEndFrame() - b.getStartFrame());
-					Vector bulbStart = bulbs.get(b.getId())
-							.get(bulbs.get(b.getId()).size() - 1).getVector();
-					Color colorStart = bulbs.get(b.getId())
-							.get(bulbs.get(b.getId()).size() - 1).getColor();
-					Vector v = new Vector(b.getVector().get(0)
-							- bulbStart.get(0), b.getVector().get(1)
-							- bulbStart.get(1), b.getVector().get(2)
-							- bulbStart.get(2));
-					Vector newBulb = new Vector(
-							bulbStart.get(0) + v.get(0) * t, bulbStart.get(1)
-									+ v.get(1) * t, bulbStart.get(2) + v.get(2)
-									* t);
-					Color newColor = new Color(colorStart.getRed() * (1 - t)
-							+ b.getColor().getRed() * t, colorStart.getGreen()
-							* (1 - t) + b.getColor().getGreen() * t,
-							colorStart.getBlue() * (1 - t)
-									+ b.getColor().getBlue() * t);
-					if (b.getStartFrame() <= i && b.getEndFrame() >= i) {
-						Vertex bulb = new Vertex(newBulb, newColor);
-						bulb.setId(b.getId());
-						bulbs.get(bulb.getId()).add(bulb);
-					} else {
-
-						Vertex bulb = new Vertex(bulbStart, colorStart);
-						bulb.setId(b.getId());
-						bulbs.get(bulb.getId()).add(bulb);
-					}
-				}
-			} else if (bulbs.size() > 0) {
-				Vector bulbVect = bulbs.get(0).get(0).getVector();
-				Color color = bulbs.get(0).get(0).getColor();
-				Vertex bulb = new Vertex(bulbVect, color);
-				bulb.setId(0);
-				bulbs.get(bulb.getId()).add(bulb);
-
-			}
+			
 
 			if (sphereStops.size() > 0) {
 				for (BusStop s : sphereStops) {
@@ -401,44 +312,22 @@ public class RayTracer {
 							// add method that takes in light vector and make a
 							// light
 							// interface
-							for (ArrayList<Vertex> sunList : suns) {
-								Vertex sun = sunList.get(i);
-								if (!RayTracer.isSunBlocked(sun,
-										closestLocation, closestObject, i)) {
+							for (Light light : lights) {
+								if (!RayTracer.isLightBlocked(light, closestLocation, closestObject, i)) {
 									double nDotI = closestNormal
 											.normalize()
 											.dotProduct(
-													sun.getVector().normalize());
+													light.getDirection(closestLocation).normalize());
 									if ((nDotI > 0 && !inverted)
 											|| (inverted && nDotI < 0)) {
 										toColor = toColor.add(closestColor
-												.multiplyColors(sun.getColor())
+												.multiplyColors(light.getColor())
 												.multiply(nDotI));
 									}
 
 								}
 							}
-							for (ArrayList<Vertex> bulbList : bulbs) {
-								Vertex bulb = bulbList.get(i);
-								if (!RayTracer.isBulbBlocked(bulb,
-										closestLocation, closestObject, i)) {
-									double nDotI = closestNormal
-											.normalize()
-											.dotProduct(
-													bulb.getVector()
-															.subtract(
-																	closestLocation)
-															.normalize());
-									if ((nDotI > 0 && !inverted)
-											|| (inverted && nDotI < 0)) {
-										toColor = toColor
-												.add(closestColor
-														.multiplyColors(
-																bulb.getColor())
-														.multiply(nDotI));
-									}
-								}
-							}
+							
 							toColor.multiplyColors(gFactor);
 							sumColor.add(toColor);
 						}
@@ -496,40 +385,23 @@ public class RayTracer {
 		return Double.POSITIVE_INFINITY;
 	}
 
-	public static boolean isSunBlocked(Vertex sun, Vector location, Object o,
-			int frame) {
-		Vector directionToSun = sun.getVector();
-		Ray rayToSun = new Ray(location, directionToSun);
-		for (ArrayList<Sphere> sphereList : spheres) {
-			Sphere sphere = sphereList.get(frame);
-			if (sphere != o
-					&& RayTracer.RayIntersectSphere(rayToSun, sphere) > 0) {
-				return true;
-			}
-		}
-		for (Plane plane : RayTracer.planes) {
-			if (plane != o && RayTracer.RayIntersectPlane(rayToSun, plane) > 0) {
-				return true;
-			}
-		}
-		return false;
-	}
 
-	public static boolean isBulbBlocked(Vertex bulb, Vector location, Object o,
-			int frame) {
-		Vector directionToBulb = bulb.getVector().subtract(location);
-		Ray rayToBulb = new Ray(location, directionToBulb);
-		// double tToBulb = 1;
+
+	
+	
+	public static boolean isLightBlocked(Light light, Vector objectLocation, Object objectToColor, int frame) {
+		Vector directionToLight = light.getDirection(objectLocation);
+		Ray rayToLight = new Ray(objectLocation, directionToLight);
 		for (ArrayList<Sphere> sphereList : spheres) {
 			Sphere sphere = sphereList.get(frame);
-			double t = RayTracer.RayIntersectSphere(rayToBulb, sphere);
-			if (sphere != o && t > 0 && t < 1) {
+			double t = RayTracer.RayIntersectSphere(rayToLight, sphere);
+			if (sphere != objectToColor && t > 0 && t < 1) {
 				return true;
 			}
 		}
 		for (Plane plane : RayTracer.planes) {
-			double t = RayTracer.RayIntersectPlane(rayToBulb, plane);
-			if (plane != o && t > 0 && t < 1) {
+			double t = RayTracer.RayIntersectPlane(rayToLight, plane);
+			if (plane != objectToColor && t > 0 && t < 1) {
 				return true;
 			}
 		}
@@ -577,36 +449,7 @@ public class RayTracer {
 				closestLocation.setColor(closestColor);
 			}
 		}
-		// find intersections with lights
-		for (ArrayList<Vertex> sunList : suns) {
-			Vertex sun = sunList.get(frame);
-			double intersect = RayTracer.RayIntersectVertex(ray, sun);
-			if (intersect >= 0 && intersect < closest) {
-				closest = intersect;
-				closestNormal = sun.getNormal().normalize();
-				closestColor = sun.getColor();
-				closestObject = sun;
-				closestLocation = ray.scale(intersect);
-				closestLocation.setLight(true);
-				closestLocation.setColor(closestColor);
-				closestLocation.setClosestNormal(closestNormal);
-				closestLocation.setClosestObject(closestObject);
-			}
-		}
-		for (ArrayList<Vertex> bulbList : bulbs) {
-			Vertex bulb = bulbList.get(frame);
-			double intersect = RayTracer.RayIntersectVertex(ray, bulb);
-			if (intersect >= 0 && intersect < closest) {
-				closest = intersect;
-				closestNormal = bulb.getNormal().normalize();
-				closestColor = bulb.getColor();
-				closestObject = bulb;
-				closestLocation = ray.scale(intersect);
-				closestLocation.setLight(true);
-				closestLocation.setClosestNormal(closestNormal);
-				closestLocation.setClosestObject(closestObject);
-			}
-		}
+		
 		return closestLocation;
 	}
 
@@ -624,28 +467,15 @@ public class RayTracer {
 		// add method that takes in light vector and make a
 		// light
 		// interface
-		for (ArrayList<Vertex> sunList : suns) {
-			Vertex sun = sunList.get(i);
-			if (!RayTracer.isSunBlocked(sun, closestLocation, closestObject, i)) {
+		for (Light light : lights) {
+			if (!RayTracer.isLightBlocked(light, closestLocation, closestObject, i)) {
 				double nDotI = closestNormal.normalize().dotProduct(
-						sun.getVector().normalize());
+						light.getDirection(closestLocation).normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
 					toColor = toColor.add(closestColor.multiplyColors(
-							sun.getColor()).multiply(nDotI));
+							light.getColor()).multiply(nDotI));
 				}
 
-			}
-		}
-		for (ArrayList<Vertex> bulbList : bulbs) {
-			Vertex bulb = bulbList.get(i);
-			if (!RayTracer.isBulbBlocked(bulb, closestLocation, closestObject,
-					i)) {
-				double nDotI = closestNormal.normalize().dotProduct(
-						bulb.getVector().subtract(closestLocation).normalize());
-				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
-					toColor = toColor.add(closestColor.multiplyColors(
-							bulb.getColor()).multiply(nDotI));
-				}
 			}
 		}
 		return toColor;
