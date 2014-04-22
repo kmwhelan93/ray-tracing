@@ -6,13 +6,14 @@ import javax.imageio.ImageIO;
 
 
 public class Plane {
-	double A;
-	double B;
-	double C;
-	double D;
-	Color color;
-	BufferedImage texture;
-	int id;
+	private double A;
+	private double B;
+	private double C;
+	private double D;
+	private Color color;
+	private BufferedImage texture;
+	private BufferedImage bumpMap;
+	private int id;
 	
 	public Plane(double A, double B, double C, double D, Color color) {
 		this.A = A;
@@ -21,74 +22,112 @@ public class Plane {
 		this.D = D;
 		this.color = color;
 		this.texture = null;
+		this.bumpMap = null;
 	}
 	
-	public Vector getNormal() {
-		return new Vector(this.A, this.B, this.C);
+	//Altered for bump mapping
+	//Parameter: vector of point on plane being colored
+	//Pass null to get actual normal of plane
+	public Vector getNormal(Vector pt) {
+		if (this.bumpMap == null || pt == null)
+			return new Vector(this.A, this.B, this.C);
+		double u = Math.abs(pt.dotProduct(this.getUaxis()));
+		double v = Math.abs(pt.dotProduct(this.getVaxis()));
+		int rgb = this.bumpMap.getRGB(
+				(int) ((u * this.bumpMap.getWidth()/4) % this.bumpMap.getWidth()),
+				(int) ((v * this.bumpMap.getHeight()/4) % this.bumpMap.getHeight()));
+		Color forNormal = new Color(((rgb >> 16) & 0xff) / 255.0,
+				((rgb >> 8) & 0xff) / 255.0, ((rgb) & 0xff) / 255.0);
+		Vector newNormal = new Vector(forNormal.getRed() * 2 - 1,
+				forNormal.getGreen() * 2 - 1, forNormal.getBlue() * 2 - 1);
+		return newNormal;
 	}
 	
 	public double getD() {
 		return this.D;
 	}
-	
+
 	public double getA() {
-		return A;
+		return this.A;
 	}
 
 	public void setA(double a) {
-		A = a;
+		this.A = a;
 	}
 
 	public double getB() {
-		return B;
+		return this.B;
 	}
 
 	public void setB(double b) {
-		B = b;
+		this.B = b;
 	}
 
 	public double getC() {
-		return C;
+		return this.C;
 	}
 
 	public void setC(double c) {
-		C = c;
+		this.C = c;
 	}
 
 	public void setD(double d) {
-		D = d;
+		this.D = d;
+	}
+
+	// For texture/bump mapping
+	public Vector getUaxis() {
+		Vector n = this.getNormal(null);
+		Vector u = new Vector(n.get(1), n.get(2), -n.get(0));
+		return u;
+	}
+
+	// For texture/bump mapping
+	public Vector getVaxis() {
+		Vector v = this.getUaxis().crossProduct(this.getNormal(null));
+		return v;
 	}
 
 	public void setColor(Color color) {
 		this.color = color;
 	}
 
-	//TODO combine these getColor methods
-	public Color getColor() {
-		return this.color;
-	}
-
-	public Color getColor(double x, double y, double depth) {
-		if (texture == null)
+	// Altered for texture mapping
+	//Parameter: vector for point on plane being colored
+	//Pass null to get original color of plane (not texture color)
+	public Color getColor(Vector pt) {
+		if (this.texture == null || pt == null)
 			return this.color;
-		int rgb = texture.getRGB((int)(x % texture.getWidth()), (int)(y % texture.getHeight()));
-		return new Color((rgb >> 16) & 0xff,
-				(rgb >> 8) & 0xff, (rgb) & 0xff);
+		double u = Math.abs(pt.dotProduct(this.getUaxis()));
+		double v = Math.abs(pt.dotProduct(this.getVaxis()));
+		int rgb = this.texture.getRGB(
+				(int) ((u * this.texture.getWidth()) % this.texture.getWidth()),
+				(int) ((v * this.texture.getHeight()) % this.texture.getHeight()));
+		return new Color(((rgb >> 16) & 0xff) / 255.0,
+				((rgb >> 8) & 0xff) / 255.0, ((rgb) & 0xff) / 255.0);
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public void setTexture(String filename) {
 		try {
-			texture = ImageIO.read(new File(filename));
+			this.texture = ImageIO.read(new File(filename));
 		} catch (IOException e) {
 			System.out.println("Error reading texture file");
+		}
+	}
+
+	public void setBumpMap(String filename) {
+		try {
+			this.bumpMap = ImageIO.read(new File(filename));
+		} catch (IOException e) {
+			System.out.println("Error reading bump map file");
 		}
 	}
 }

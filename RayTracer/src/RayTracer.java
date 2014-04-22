@@ -125,6 +125,16 @@ public class RayTracer {
 					int id = temp.nextInt();
 					String texture = temp.next();
 					spheres.get(id).get(0).setTexture(texture);
+				} else if(command.equals("planeB")) {
+					//planeT id filename
+					int id = temp.nextInt();
+					String bump = temp.next();
+					planes.get(id).setBumpMap(bump);
+				} else if(command.equals("sphereB")) {
+					//sphereB id filename
+					int id = temp.nextInt();
+					String bump = temp.next();
+					spheres.get(id).get(0).setBumpMap(bump);
 				}
 			}
 			temp.close();
@@ -199,6 +209,8 @@ public class RayTracer {
 								.get(s.getId()).get(0).getId());
 						sphere.setTexture(spheres
 								.get(s.getId()).get(0).getTexture());
+						sphere.setBumpMap(spheres
+								.get(s.getId()).get(0).getBumpMap());
 						spheres.get(sphere.getId()).add(sphere);
 					} else {
 
@@ -208,6 +220,8 @@ public class RayTracer {
 								.get(s.getId()).get(0).getId());
 						sphere.setTexture(spheres
 								.get(s.getId()).get(0).getTexture());
+						sphere.setBumpMap(spheres
+								.get(s.getId()).get(0).getBumpMap());
 						spheres.get(sphere.getId()).add(sphere);
 					}
 				}
@@ -278,8 +292,8 @@ public class RayTracer {
 								plane);
 						if (intersect >= 0 && intersect < closest) {
 							closest = intersect;
-							closestNormal = plane.getNormal().normalize();
-							closestColor = plane.getColor();
+							closestNormal = plane.getNormal(ray.getOrigin().add(ray.getDirection().scale(intersect))).normalize();
+							closestColor = plane.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
 							closestObject = plane;
 							closestLocation = ray.scale(intersect);
 						}
@@ -369,9 +383,9 @@ public class RayTracer {
 	}
 
 	public static double RayIntersectPlane(Ray ray, Plane plane) {
-		double t = (-1 * plane.getD() - plane.getNormal().dotProduct(
+		double t = (-1 * plane.getD() - plane.getNormal(null).dotProduct(
 				ray.getOrigin()))
-				/ plane.getNormal().dotProduct(ray.getDirection());
+				/ plane.getNormal(null).dotProduct(ray.getDirection());
 		return t;
 	}
 
@@ -439,8 +453,8 @@ public class RayTracer {
 			double intersect = RayTracer.RayIntersectPlane(ray, plane);
 			if (intersect >= 0 && intersect < closest) {
 				closest = intersect;
-				closestNormal = plane.getNormal().normalize();
-				closestColor = plane.getColor();
+				closestNormal = plane.getNormal(ray.getOrigin().add(ray.getDirection().scale(intersect))).normalize();
+				closestColor = plane.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
 				closestObject = plane;
 				closestLocation = ray.scale(intersect);
 				closestLocation.setClosestNormal(closestNormal);
