@@ -27,9 +27,8 @@ public class RayTracer {
 	private static Vector up = new Vector(0, 1, 0);
 	private static ArrayList<Light> lights = new ArrayList<Light>();
 	private static ArrayList<BusStop> lightStops = new ArrayList<BusStop>();
-	private static ArrayList<ArrayList<Sphere>> spheres = new ArrayList<ArrayList<Sphere>>();
+	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<BusStop> sphereStops = new ArrayList<BusStop>();
-	private static ArrayList<Plane> planes = new ArrayList<Plane>();
 	private static ArrayList<BusStop> planeStops = new ArrayList<BusStop>();
 
 	public static void main(String[] args) throws Exception {
@@ -102,10 +101,10 @@ public class RayTracer {
 					int id = temp.nextInt();
 					Sphere s = new Sphere(v, radius, color);
 					s.setId(id);
-					if (id >= spheres.size()) {
-						spheres.add(new ArrayList<Sphere>());
-					}
-					spheres.get(id).add(s);
+//					if (id >= spheres.size()) {
+//						spheres.add(new ArrayList<Sphere>());
+//					}
+					obstacles.add(s);
 				} else if (command.equals("plane")) {
 					double A = temp.nextDouble();
 					double B = temp.nextDouble();
@@ -114,17 +113,17 @@ public class RayTracer {
 					Color color = new Color(temp.nextDouble(),
 							temp.nextDouble(), temp.nextDouble());
 					Plane plane = new Plane(A, B, C, D, color);
-					planes.add(plane);
+					obstacles.add(plane);
 				} else if (command.equals("planeT")) {
 					//planeT id filename
 					int id = temp.nextInt();
 					String texture = temp.next();
-					planes.get(id).setTexture(texture);
+					((Plane)obstacles.get(id)).setTexture(texture);
 				} else if (command.equals("sphereT")) {
 					//sphereT id filename
 					int id = temp.nextInt();
 					String texture = temp.next();
-					spheres.get(id).get(0).setTexture(texture);
+					((Sphere)obstacles.get(id)).setTexture(texture);
 				}
 			}
 			temp.close();
@@ -161,65 +160,65 @@ public class RayTracer {
 
 		for (int i = 1; i <= framesNum; i++) {
 
-			for (BusStop e : eyeStops) {
-				double t = ((double) i - e.getStartFrame())
-						/ (e.getEndFrame() - e.getStartFrame());
-				Vector v = new Vector(e.getVector().get(0) - eyeStart.get(0), e
-						.getVector().get(1) - eyeStart.get(1), e.getVector()
-						.get(2) - eyeStart.get(2));
-				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
-						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
-			}
-			
-
-			if (sphereStops.size() > 0) {
-				for (BusStop s : sphereStops) {
-					double t = ((double) i - s.getStartFrame())
-							/ (s.getEndFrame() - s.getStartFrame());
-					Vector sphereStart = spheres.get(s.getId())
-							.get(spheres.get(s.getId()).size() - 1).getCenter();
-					Color colorStart = spheres.get(s.getId())
-							.get(spheres.get(s.getId()).size() - 1).getColor(null);
-					Vector v = new Vector(s.getVector().get(0)
-							- sphereStart.get(0), s.getVector().get(1)
-							- sphereStart.get(1), s.getVector().get(2)
-							- sphereStart.get(2));
-					Vector newSphere = new Vector(sphereStart.get(0) + v.get(0)
-							* t, sphereStart.get(1) + v.get(1) * t,
-							sphereStart.get(2) + v.get(2) * t);
-					Color newColor = new Color(colorStart.getRed() * (1 - t)
-							+ s.getColor().getRed() * t, colorStart.getGreen()
-							* (1 - t) + s.getColor().getGreen() * t,
-							colorStart.getBlue() * (1 - t)
-									+ s.getColor().getBlue() * t);
-					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
-						Sphere sphere = new Sphere(newSphere, spheres
-								.get(s.getId()).get(0).getRadius(), newColor);
-						sphere.setId(spheres
-								.get(s.getId()).get(0).getId());
-						sphere.setTexture(spheres
-								.get(s.getId()).get(0).getTexture());
-						spheres.get(sphere.getId()).add(sphere);
-					} else {
-
-						Sphere sphere = new Sphere(sphereStart, spheres
-								.get(s.getId()).get(0).getRadius(), colorStart);
-						sphere.setId(spheres
-								.get(s.getId()).get(0).getId());
-						sphere.setTexture(spheres
-								.get(s.getId()).get(0).getTexture());
-						spheres.get(sphere.getId()).add(sphere);
-					}
-				}
-			} else if (spheres.size() > 0) {
-				Vector center = spheres.get(0).get(0).getCenter();
-				double radius = spheres.get(0).get(0).getRadius();
-				Color color = spheres.get(0).get(0).getColor(null);
-				Sphere sphere = new Sphere(center, radius, color);
-				sphere.setId(0);
-				spheres.get(sphere.getId()).add(sphere);
-
-			}
+//			for (BusStop e : eyeStops) {
+//				double t = ((double) i - e.getStartFrame())
+//						/ (e.getEndFrame() - e.getStartFrame());
+//				Vector v = new Vector(e.getVector().get(0) - eyeStart.get(0), e
+//						.getVector().get(1) - eyeStart.get(1), e.getVector()
+//						.get(2) - eyeStart.get(2));
+//				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
+//						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
+//			}
+//			
+//
+//			if (sphereStops.size() > 0) {
+//				for (BusStop s : sphereStops) {
+//					double t = ((double) i - s.getStartFrame())
+//							/ (s.getEndFrame() - s.getStartFrame());
+//					Vector sphereStart = spheres.get(s.getId())
+//							.get(spheres.get(s.getId()).size() - 1).getCenter();
+//					Color colorStart = spheres.get(s.getId())
+//							.get(spheres.get(s.getId()).size() - 1).getColor(null);
+//					Vector v = new Vector(s.getVector().get(0)
+//							- sphereStart.get(0), s.getVector().get(1)
+//							- sphereStart.get(1), s.getVector().get(2)
+//							- sphereStart.get(2));
+//					Vector newSphere = new Vector(sphereStart.get(0) + v.get(0)
+//							* t, sphereStart.get(1) + v.get(1) * t,
+//							sphereStart.get(2) + v.get(2) * t);
+//					Color newColor = new Color(colorStart.getRed() * (1 - t)
+//							+ s.getColor().getRed() * t, colorStart.getGreen()
+//							* (1 - t) + s.getColor().getGreen() * t,
+//							colorStart.getBlue() * (1 - t)
+//									+ s.getColor().getBlue() * t);
+//					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
+//						Sphere sphere = new Sphere(newSphere, spheres
+//								.get(s.getId()).get(0).getRadius(), newColor);
+//						sphere.setId(spheres
+//								.get(s.getId()).get(0).getId());
+//						sphere.setTexture(spheres
+//								.get(s.getId()).get(0).getTexture());
+//						spheres.get(sphere.getId()).add(sphere);
+//					} else {
+//
+//						Sphere sphere = new Sphere(sphereStart, spheres
+//								.get(s.getId()).get(0).getRadius(), colorStart);
+//						sphere.setId(spheres
+//								.get(s.getId()).get(0).getId());
+//						sphere.setTexture(spheres
+//								.get(s.getId()).get(0).getTexture());
+//						spheres.get(sphere.getId()).add(sphere);
+//					}
+//				}
+//			} else if (spheres.size() > 0) {
+//				Vector center = spheres.get(0).get(0).getCenter();
+//				double radius = spheres.get(0).get(0).getRadius();
+//				Color color = spheres.get(0).get(0).getColor(null);
+//				Sphere sphere = new Sphere(center, radius, color);
+//				sphere.setId(0);
+//				spheres.get(sphere.getId()).add(sphere);
+//
+//			}
 		}
 		for (int i = 0; i < framesNum; i++) {
 			Color clearColor = new Color(0, 0, 0, 0);
@@ -258,32 +257,19 @@ public class RayTracer {
 					Object closestObject = null;
 					Vector closestLocation = null;
 					// find intersections with spheres
-					for (ArrayList<Sphere> sphereList : spheres) {
-						Sphere sphere = sphereList.get(i);
-						double intersect = RayTracer.RayIntersectSphere(ray,
-								sphere);
+					for (Obstacle obstacle : obstacles) {
+						double intersect = obstacle.findIntersection(ray);
 						if (intersect >= 0 && intersect < closest) {
 							closest = intersect;
 							Vector location = ray.scale(intersect);
-							closestNormal = sphere.getNormal(location)
+							closestNormal = obstacle.getNormal(location)
 									.normalize();
-							closestColor = sphere.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
-							closestObject = sphere;
+							closestColor = obstacle.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
+							closestObject = obstacle;
 							closestLocation = location;
 						}
 					}
-					// find intersections with planes
-					for (Plane plane : planes) {
-						double intersect = RayTracer.RayIntersectPlane(ray,
-								plane);
-						if (intersect >= 0 && intersect < closest) {
-							closest = intersect;
-							closestNormal = plane.getNormal().normalize();
-							closestColor = plane.getColor();
-							closestObject = plane;
-							closestLocation = ray.scale(intersect);
-						}
-					}
+					
 					if (closestObject != null) {
 						// Global illumination algorithm starts here
 						int numFactoredSampleRays = numSampleRays;
@@ -345,35 +331,7 @@ public class RayTracer {
 		}
 	}
 
-	public static double RayIntersectSphere(Ray ray, Sphere sphere) {
-		double a = ray.getDirection().dotProduct(ray.getDirection());
-		double b = 2 * ray.getOrigin().subtract(sphere.getCenter())
-				.dotProduct(ray.getDirection());
-		double c = ray.getOrigin().subtract(sphere.getCenter())
-				.dotProduct(ray.getOrigin().subtract(sphere.getCenter()))
-				- sphere.getRadius() * sphere.getRadius();
-		double presqrt = b * b - 4 * a * c;
-		if (presqrt < 0) {
-			return -1;
-		}
-		double sqrt = Math.sqrt(presqrt);
-		double smaller = (-1 * b - sqrt) / (2 * a);
-		if (smaller > 0) {
-			return smaller;
-		}
-		double bigger = (-1 * b + sqrt) / (2 * a);
-		if (bigger > 0) {
-			return bigger;
-		}
-		return -1;
-	}
-
-	public static double RayIntersectPlane(Ray ray, Plane plane) {
-		double t = (-1 * plane.getD() - plane.getNormal().dotProduct(
-				ray.getOrigin()))
-				/ plane.getNormal().dotProduct(ray.getDirection());
-		return t;
-	}
+	
 
 	public static double RayIntersectVertex(Ray ray, Vertex lightSource) {
 		Vector lightSourceVector = new Vector(lightSource, false);
@@ -392,16 +350,9 @@ public class RayTracer {
 	public static boolean isLightBlocked(Light light, Vector objectLocation, Object objectToColor, int frame) {
 		Vector directionToLight = light.getDirection(objectLocation);
 		Ray rayToLight = new Ray(objectLocation, directionToLight);
-		for (ArrayList<Sphere> sphereList : spheres) {
-			Sphere sphere = sphereList.get(frame);
-			double t = RayTracer.RayIntersectSphere(rayToLight, sphere);
-			if (sphere != objectToColor && t > 0 && t < 1) {
-				return true;
-			}
-		}
-		for (Plane plane : RayTracer.planes) {
-			double t = RayTracer.RayIntersectPlane(rayToLight, plane);
-			if (plane != objectToColor && t > 0 && t < 1) {
+		for (Obstacle obstacle : obstacles) {
+			double t = obstacle.findIntersection(rayToLight);
+			if (obstacle != objectToColor && t > 0 && t < 1) {
 				return true;
 			}
 		}
@@ -418,31 +369,15 @@ public class RayTracer {
 		Vector closestLocation = new Vector();
 		closestLocation.setLight(false);
 		// find intersections with spheres
-		for (ArrayList<Sphere> sphereList : spheres) {
-			Sphere sphere = sphereList.get(frame);
-			double intersect = RayTracer.RayIntersectSphere(ray, sphere);
+		for (Obstacle obstacle : obstacles) {
+			double intersect = obstacle.findIntersection(ray);
 			if (intersect >= 0 && intersect < closest) {
 				closest = intersect;
 				Vector location = ray.scale(intersect);
-				closestNormal = sphere.getNormal(location).normalize();
-				closestColor = sphere.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
-				closestObject = sphere;
+				closestNormal = obstacle.getNormal(location).normalize();
+				closestColor = obstacle.getColor(ray.getOrigin().add(ray.getDirection().scale(intersect)));
+				closestObject = obstacle;
 				closestLocation = location;
-				closestLocation.setClosestNormal(closestNormal);
-				closestLocation.setClosestObject(closestObject);
-				closestLocation.setLight(false);
-				closestLocation.setColor(closestColor);
-			}
-		}
-		// find intersections with planes
-		for (Plane plane : planes) {
-			double intersect = RayTracer.RayIntersectPlane(ray, plane);
-			if (intersect >= 0 && intersect < closest) {
-				closest = intersect;
-				closestNormal = plane.getNormal().normalize();
-				closestColor = plane.getColor();
-				closestObject = plane;
-				closestLocation = ray.scale(intersect);
 				closestLocation.setClosestNormal(closestNormal);
 				closestLocation.setClosestObject(closestObject);
 				closestLocation.setLight(false);

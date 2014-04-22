@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Sphere {
+public class Sphere implements Obstacle {
 	private Vector center;
 	private Color color;
 	private BufferedImage texture;
@@ -94,4 +94,29 @@ public class Sphere {
 	public Vector getNormal(Vector location) {
 		return location.subtract(this.center).normalize();
 	}
+
+	@Override
+	public double findIntersection(Ray ray) {
+		double a = ray.getDirection().dotProduct(ray.getDirection());
+		double b = 2 * ray.getOrigin().subtract(this.getCenter())
+				.dotProduct(ray.getDirection());
+		double c = ray.getOrigin().subtract(this.getCenter())
+				.dotProduct(ray.getOrigin().subtract(this.getCenter()))
+				- this.getRadius() * this.getRadius();
+		double presqrt = b * b - 4 * a * c;
+		if (presqrt < 0) {
+			return -1;
+		}
+		double sqrt = Math.sqrt(presqrt);
+		double smaller = (-1 * b - sqrt) / (2 * a);
+		if (smaller > 0) {
+			return smaller;
+		}
+		double bigger = (-1 * b + sqrt) / (2 * a);
+		if (bigger > 0) {
+			return bigger;
+		}
+		return -1;
+	}
+
 }
