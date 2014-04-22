@@ -338,7 +338,7 @@ public class RayTracer {
 			}
 
 			scan.close();
-			String newFilename = filename.replace(".png", (i + 1) + ".png");
+			String newFilename = "generatedimgs/" + filename.replace(".png", (i + 1) + ".png");
 			System.out.println("Drawing " + newFilename + "...");
 
 			ImageIO.write(b, "png", new File(newFilename));
