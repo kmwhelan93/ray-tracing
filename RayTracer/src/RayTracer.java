@@ -124,6 +124,16 @@ public class RayTracer {
 					int id = temp.nextInt();
 					String texture = temp.next();
 					((Sphere)obstacles.get(id)).setTexture(texture);
+				} else if(command.equals("planeB")) {
+					//planeT id filename
+					int id = temp.nextInt();
+					String bump = temp.next();
+					((Plane)obstacles.get(id)).setBumpMap(bump);
+				} else if(command.equals("sphereB")) {
+					//sphereB id filename
+					int id = temp.nextInt();
+					String bump = temp.next();
+					((Sphere)obstacles.get(id)).setBumpMap(bump);
 				}
 			}
 			temp.close();
@@ -160,65 +170,18 @@ public class RayTracer {
 
 		for (int i = 1; i <= framesNum; i++) {
 
-//			for (BusStop e : eyeStops) {
-//				double t = ((double) i - e.getStartFrame())
-//						/ (e.getEndFrame() - e.getStartFrame());
-//				Vector v = new Vector(e.getVector().get(0) - eyeStart.get(0), e
-//						.getVector().get(1) - eyeStart.get(1), e.getVector()
-//						.get(2) - eyeStart.get(2));
-//				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
-//						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
-//			}
-//			
-//
-//			if (sphereStops.size() > 0) {
-//				for (BusStop s : sphereStops) {
-//					double t = ((double) i - s.getStartFrame())
-//							/ (s.getEndFrame() - s.getStartFrame());
-//					Vector sphereStart = spheres.get(s.getId())
-//							.get(spheres.get(s.getId()).size() - 1).getCenter();
-//					Color colorStart = spheres.get(s.getId())
-//							.get(spheres.get(s.getId()).size() - 1).getColor(null);
-//					Vector v = new Vector(s.getVector().get(0)
-//							- sphereStart.get(0), s.getVector().get(1)
-//							- sphereStart.get(1), s.getVector().get(2)
-//							- sphereStart.get(2));
-//					Vector newSphere = new Vector(sphereStart.get(0) + v.get(0)
-//							* t, sphereStart.get(1) + v.get(1) * t,
-//							sphereStart.get(2) + v.get(2) * t);
-//					Color newColor = new Color(colorStart.getRed() * (1 - t)
-//							+ s.getColor().getRed() * t, colorStart.getGreen()
-//							* (1 - t) + s.getColor().getGreen() * t,
-//							colorStart.getBlue() * (1 - t)
-//									+ s.getColor().getBlue() * t);
-//					if (s.getStartFrame() <= i && s.getEndFrame() >= i) {
-//						Sphere sphere = new Sphere(newSphere, spheres
-//								.get(s.getId()).get(0).getRadius(), newColor);
-//						sphere.setId(spheres
-//								.get(s.getId()).get(0).getId());
-//						sphere.setTexture(spheres
-//								.get(s.getId()).get(0).getTexture());
-//						spheres.get(sphere.getId()).add(sphere);
-//					} else {
-//
-//						Sphere sphere = new Sphere(sphereStart, spheres
-//								.get(s.getId()).get(0).getRadius(), colorStart);
-//						sphere.setId(spheres
-//								.get(s.getId()).get(0).getId());
-//						sphere.setTexture(spheres
-//								.get(s.getId()).get(0).getTexture());
-//						spheres.get(sphere.getId()).add(sphere);
-//					}
-//				}
-//			} else if (spheres.size() > 0) {
-//				Vector center = spheres.get(0).get(0).getCenter();
-//				double radius = spheres.get(0).get(0).getRadius();
-//				Color color = spheres.get(0).get(0).getColor(null);
-//				Sphere sphere = new Sphere(center, radius, color);
-//				sphere.setId(0);
-//				spheres.get(sphere.getId()).add(sphere);
-//
-//			}
+
+			for (BusStop e : eyeStops) {
+				double t = ((double) i - e.getStartFrame())
+						/ (e.getEndFrame() - e.getStartFrame());
+				Vector v = new Vector(e.getVector().get(0) - eyeStart.get(0), e
+						.getVector().get(1) - eyeStart.get(1), e.getVector()
+						.get(2) - eyeStart.get(2));
+				eyes.add(new Vector(eyeStart.get(0) + v.get(0) * t, eyeStart
+						.get(1) + v.get(1) * t, eyeStart.get(2) + v.get(2) * t));
+			}
+			
+
 		}
 		for (int i = 0; i < framesNum; i++) {
 			Color clearColor = new Color(0, 0, 0, 0);
@@ -269,7 +232,6 @@ public class RayTracer {
 							closestLocation = location;
 						}
 					}
-					
 					if (closestObject != null) {
 						// Global illumination algorithm starts here
 						int numFactoredSampleRays = numSampleRays;
@@ -331,7 +293,6 @@ public class RayTracer {
 		}
 	}
 
-	
 
 	public static double RayIntersectVertex(Ray ray, Vertex lightSource) {
 		Vector lightSourceVector = new Vector(lightSource, false);
