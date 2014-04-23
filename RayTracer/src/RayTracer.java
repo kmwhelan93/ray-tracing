@@ -2,6 +2,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
@@ -158,10 +159,22 @@ public class RayTracer {
 					Color color = new Color(r, g, b);
 					RayTracer.vertices.add(new Vector(x, y, z, color));
 				} else if (command.equals("triangle")) {
-					int id = lineReader.nextInt();
-					Vector p1 = RayTracer.getVertex(lineReader.nextInt());
-					Vector p2 = RayTracer.getVertex(lineReader.nextInt());
-					Vector p3 = RayTracer.getVertex(lineReader.nextInt());
+					int id;
+					Vector p1;
+					Vector p2;
+					Vector p3;
+					if (!nextLine.contains(":")) {
+						id = lineReader.nextInt();
+						p1 = RayTracer.getVertex(lineReader.nextInt());
+						p2 = RayTracer.getVertex(lineReader.nextInt());
+						p3 = RayTracer.getVertex(lineReader.nextInt());
+					} else {
+						HashMap<String, Double> map = RayTracer.hashLine(lineReader);
+						id = map.get("id").intValue();
+						p1 = RayTracer.getVertex(map.get("p1").intValue());
+						p2 = RayTracer.getVertex(map.get("p2").intValue());
+						p3 = RayTracer.getVertex(map.get("p3").intValue());
+					}
 					Triangle triangle = new Triangle(id, p1, p2, p3);
 					RayTracer.obstacles.add(triangle);
 				}
@@ -409,5 +422,14 @@ public class RayTracer {
 		}
 		return new Vector(RayTracer.vertices.get(RayTracer.vertices.size()
 				+ index));
+	}
+	
+	public static HashMap<String, Double> hashLine(Scanner s) {
+		HashMap<String, Double> retVal = new HashMap<String, Double>();
+		while (s.hasNext()) {
+			String[] nextKeyValuePair =s.next().split(":");
+			retVal.put(nextKeyValuePair[0], Double.parseDouble(nextKeyValuePair[1]));
+		}
+		return retVal;
 	}
 }
