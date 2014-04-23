@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Plane implements Obstacle {
+public class Plane extends Obstacle {
 	private double A;
 	private double B;
 	private double C;
@@ -138,5 +138,24 @@ public class Plane implements Obstacle {
 		} catch (IOException e) {
 			System.out.println("Error reading bump map file");
 		}
+	}
+
+	// doesnt make sense
+	@Override
+	public Vector getVector() {
+		return null;
+	}
+
+
+	// doesnt make sense
+	@Override
+	public double getRadius() {
+		return 0;
+	}
+
+
+	@Override
+	public Color getColor() {
+		return this.getColor(null);
 	}
 }

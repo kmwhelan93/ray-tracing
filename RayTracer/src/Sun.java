@@ -25,7 +25,6 @@ public class Sun extends Light{
 	public double getRadius() {
 		return -1;
 	}
-
 	
 	
 

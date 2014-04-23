@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Sphere extends Moveable implements Obstacle {
+public class Sphere extends Obstacle {
 	private Vector center;
 	private Color color;
 	private BufferedImage texture;
@@ -178,6 +178,7 @@ public class Sphere extends Moveable implements Obstacle {
 
 	@Override
 	public Color getColor() {
-		return this.color;
+		return this.getColor(null);
 	}
+
 }

@@ -2,6 +2,8 @@ import java.util.ArrayList;
 
 public abstract class Moveable {
 
+	// ALSO: note that I (KW) made Planes Moveable. This is so all obstacles can be treated
+	// the same way. Since Planes have an empty moveableOverFrames, this shouldn't be a problem.
 	ArrayList<Moveable> moveableOverFrames;
 	int frameNumber;
 	int id;
@@ -17,16 +19,17 @@ public abstract class Moveable {
 		moveableOverFrames.add(m);
 		this.frameNumber = frameNumber;
 	}
-
+	// Note: Triangles and Spheres don't have this
 	public abstract Vector getVector();
 
-	public abstract Color getColor();
-
+	// Only Spheres have this
 	public abstract double getRadius();
 
 	public void addCheckpoint(Moveable m) {
 		moveableOverFrames.add(m);
 	}
+	
+	public abstract Color getColor();
 
 	Moveable getState(int frameNumber) {
 		if (moveableOverFrames.size() > 1) {

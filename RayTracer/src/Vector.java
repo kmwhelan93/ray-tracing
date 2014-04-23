@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Vector extends Matrix {
 	
 	boolean isLight = false;
-	Color lightColor;
+	Color color;
 	Object closestObject;
 	Vector closestNormal;
 	
@@ -14,6 +14,20 @@ public class Vector extends Matrix {
 		for (int i = 0; i < values.length; i++) {
 			matrix[i][0] = values[i];
 		}
+	}
+	public Vector(Vector v) {
+		this.isLight = v.isLight;
+		this.color = v.color;
+		this.matrix = v.matrix;
+		this.closestObject = v.closestObject;
+		this.closestNormal = v.closestNormal;
+	}
+	public Vector(double x, double y, double z, Color color) {
+		matrix = new double[3][1];
+		matrix[0][0] = x;
+		matrix[1][0] = y;
+		matrix[2][0] = z;
+		this.color = color;
 	}
 	public Vector(Matrix m) {
 		this.matrix = m.getMatrix();
@@ -44,10 +58,10 @@ public class Vector extends Matrix {
 	}
 	
 	public Color getColor() {
-		return this.lightColor;
+		return this.color;
 	}
 	public void setColor(Color color) {
-		this.lightColor = color;
+		this.color = color;
 	}
 	
 	public boolean getLight() {

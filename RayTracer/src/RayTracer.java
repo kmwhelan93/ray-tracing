@@ -25,9 +25,8 @@ public class RayTracer {
 	private static Vector up = new Vector(0, 1, 0);
 	// private static ArrayList<Light> lights = new ArrayList<Light>();
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-	private static ArrayList<Moveable> lights = new ArrayList<Moveable>();
-	private static ArrayList<Moveable> spheres = new ArrayList<Moveable>();
-	private static ArrayList<Plane> planes = new ArrayList<Plane>();
+	private static ArrayList<Light> lights = new ArrayList<Light>();
+	private static ArrayList<Vector> vertices = new ArrayList<Vector>();
 
 	public static void main(String[] args) throws Exception {
 
@@ -35,215 +34,140 @@ public class RayTracer {
 		String filename = "";
 
 		while (scan.hasNextLine()) {
-			// Scanner temp = new Scanner(scan.nextLine().trim());
-			// if (temp.hasNext()) {
-			// String command = temp.next();
-			// if (command.equals("png")) {
-			// // png
-			// width = temp.nextInt();
-			// height = temp.nextInt();
-			// framesNum = temp.nextInt();
-			// filename = temp.nextLine().trim();
-			// b = new BufferedImage(width, height,
-			// BufferedImage.TYPE_4BYTE_ABGR);
-			// r = b.getRaster();
-			// } else if (command.equals("eye")) {
-			// eye = new Vector(temp.nextDouble(), temp.nextDouble(),
-			// temp.nextDouble());
-			// } else if (command.equals("forward")) {
-			// // do not normalize
-			// forward = new Vector(temp.nextDouble(), temp.nextDouble(),
-			// temp.nextDouble());
-			// // recompute right and up vectors
-			// right = forward.crossProduct(up).normalize();
-			// up = right.crossProduct(forward).normalize();
-			// } else if (command.equals("up")) {
-			// double x = temp.nextDouble();
-			// double y = temp.nextDouble();
-			// double z = temp.nextDouble();
-			// Vector v = new Vector(x, y, z);
-			// right = forward.crossProduct(v).normalize();
-			// up = right.crossProduct(forward).normalize();
-			// } else if (command.equals("sun")) {
-			// double x = temp.nextDouble();
-			// double y = temp.nextDouble();
-			// double z = temp.nextDouble();
-			// Vector v = new Vector(x, y, z).normalize();
-			// Color color = new Color(temp.nextDouble(),
-			// temp.nextDouble(), temp.nextDouble());
-			// int id = temp.nextInt();
-			// Sun sun = new Sun(id, v, color);
-			// while (id >= lights.size()) {
-			// lights.add(null);
-			// }
-			// lights.set(id, sun);
-			// } else if (command.equals("bulb")) {
-			// double x = temp.nextDouble();
-			// double y = temp.nextDouble();
-			// double z = temp.nextDouble();
-			// Color color = new Color(temp.nextDouble(),
-			// temp.nextDouble(), temp.nextDouble());
-			// int id = temp.nextInt();
-			// Vector location = new Vector(x, y, z);
-			// Bulb bulb = new Bulb(id, location, color);
-			// while (id >= lights.size()) {
-			// lights.add(null);
-			// }
-			// lights.set(id, bulb);
-			// } else if (command.equals("sphere")) {
-			// Vector v = new Vector(temp.nextDouble(), temp.nextDouble(),
-			// temp.nextDouble());
-			// double radius = temp.nextDouble();
-			// Color color = new Color(temp.nextDouble(),
-			// temp.nextDouble(), temp.nextDouble());
-			// int id = temp.nextInt();
-			// Sphere s = new Sphere(v, radius, color);
-			// s.setId(id);
-			// // if (id >= spheres.size()) {
-			// // spheres.add(new ArrayList<Sphere>());
-			// // }
-			// obstacles.add(s);
-			// } else if (command.equals("plane")) {
-			// double A = temp.nextDouble();
-			// double B = temp.nextDouble();
-			// double C = temp.nextDouble();
-			// double D = temp.nextDouble();
-			// Color color = new Color(temp.nextDouble(),
-			// temp.nextDouble(), temp.nextDouble());
-			// Plane plane = new Plane(A, B, C, D, color);
-			// obstacles.add(plane);
-			// } else if (command.equals("planeT")) {
-			// //planeT id filename
-			// int id = temp.nextInt();
-			// String texture = temp.next();
-			// ((Plane)obstacles.get(id)).setTexture(texture);
-			// } else if (command.equals("sphereT")) {
-			// //sphereT id filename
-			// int id = temp.nextInt();
-			// String texture = temp.next();
-			// ((Sphere)obstacles.get(id)).setTexture(texture);
-			// } else if(command.equals("planeB")) {
-			// //planeT id filename
-			// int id = temp.nextInt();
-			// String bump = temp.next();
-			// ((Plane)obstacles.get(id)).setBumpMap(bump);
-			// } else if(command.equals("sphereB")) {
-			// //sphereB id filename
-			// int id = temp.nextInt();
-			// String bump = temp.next();
-			// ((Sphere)obstacles.get(id)).setBumpMap(bump);
-			String[] line = scan.nextLine().trim().split(" ");
-			String command = line[0];
-			if (command.equals("png")) {
-				// png
-				width = Integer.parseInt(line[1]);
-				height = Integer.parseInt(line[2]);
-				framesNum = Integer.parseInt(line[3]);
-				filename = line[4].trim();
-				b = new BufferedImage(width, height,
-						BufferedImage.TYPE_4BYTE_ABGR);
-				r = b.getRaster();
-			} else if (command.equals("eye")) {
-				Eye e = new Eye(new Vector(Double.parseDouble(line[1]),
-						Double.parseDouble(line[2]),
-						Double.parseDouble(line[3]), Integer.parseInt(line[4])));
-				e.frameNumber = Integer.parseInt(line[4]);
-				eye.addCheckpoint(e);
-				eye.frameNumber = Integer.parseInt(line[4]);
-			} else if (command.equals("forward")) {
-				// do not normalize
-				forward = new Vector(Double.parseDouble(line[1]),
-						Double.parseDouble(line[2]),
-						Double.parseDouble(line[3]));
-				// recompute right and up vectors
-				right = forward.crossProduct(up).normalize();
-				up = right.crossProduct(forward).normalize();
-			} else if (command.equals("up")) {
-				double x = Double.parseDouble(line[1]);
-				double y = Double.parseDouble(line[2]);
-				double z = Double.parseDouble(line[3]);
-				Vector v = new Vector(x, y, z);
-				right = forward.crossProduct(v).normalize();
-				up = right.crossProduct(forward).normalize();
-			} else if (command.equals("sun")) {
-				double x = Double.parseDouble(line[1]);
-				double y = Double.parseDouble(line[2]);
-				double z = Double.parseDouble(line[3]);
-				Vector v = new Vector(x, y, z).normalize();
-				Color color = new Color(Double.parseDouble(line[4]),
-						Double.parseDouble(line[5]),
-						Double.parseDouble(line[6]));
-				int id = Integer.parseInt(line[7]);
-				Sun sun = new Sun(id, v, color);
-				sun.frameNumber = Integer.parseInt(line[8]);
-				if (lights.size() <= id) {
-					lights.add(sun);
-				} else {
-					lights.get(id).addCheckpoint(sun);
+			String nextLine = scan.nextLine();
+			// For what good did you remove the scanner??????
+			Scanner lineReader = new Scanner(nextLine);
+			if (lineReader.hasNext()) {
+				lineReader.next();
+				String[] line = nextLine.trim().split(" ");
+				String command = line[0];
+				if (command.equals("png")) {
+					// png
+					width = Integer.parseInt(line[1]);
+					height = Integer.parseInt(line[2]);
+					framesNum = Integer.parseInt(line[3]);
+					filename = line[4].trim();
+					b = new BufferedImage(width, height,
+							BufferedImage.TYPE_4BYTE_ABGR);
+					r = b.getRaster();
+				} else if (command.equals("eye")) {
+					Eye e = new Eye(new Vector(Double.parseDouble(line[1]),
+							Double.parseDouble(line[2]),
+							Double.parseDouble(line[3]),
+							Integer.parseInt(line[4])));
+					e.frameNumber = Integer.parseInt(line[4]);
+					eye.addCheckpoint(e);
+					eye.frameNumber = Integer.parseInt(line[4]);
+				} else if (command.equals("forward")) {
+					// do not normalize
+					forward = new Vector(Double.parseDouble(line[1]),
+							Double.parseDouble(line[2]),
+							Double.parseDouble(line[3]));
+					// recompute right and up vectors
+					right = forward.crossProduct(up).normalize();
+					up = right.crossProduct(forward).normalize();
+				} else if (command.equals("up")) {
+					double x = Double.parseDouble(line[1]);
+					double y = Double.parseDouble(line[2]);
+					double z = Double.parseDouble(line[3]);
+					Vector v = new Vector(x, y, z);
+					right = forward.crossProduct(v).normalize();
+					up = right.crossProduct(forward).normalize();
+				} else if (command.equals("sun")) {
+					double x = Double.parseDouble(line[1]);
+					double y = Double.parseDouble(line[2]);
+					double z = Double.parseDouble(line[3]);
+					Vector v = new Vector(x, y, z).normalize();
+					Color color = new Color(Double.parseDouble(line[4]),
+							Double.parseDouble(line[5]),
+							Double.parseDouble(line[6]));
+					int id = Integer.parseInt(line[7]);
+					Sun sun = new Sun(id, v, color);
+					sun.frameNumber = Integer.parseInt(line[8]);
+					if (lights.size() <= id) {
+						lights.add(sun);
+					} else {
+						lights.get(id).addCheckpoint(sun);
+					}
+				} else if (command.equals("bulb")) {
+					double x = Double.parseDouble(line[1]);
+					double y = Double.parseDouble(line[2]);
+					double z = Double.parseDouble(line[3]);
+					Color color = new Color(Double.parseDouble(line[4]),
+							Double.parseDouble(line[5]),
+							Double.parseDouble(line[6]));
+					int id = Integer.parseInt(line[7]);
+					Vector location = new Vector(x, y, z);
+					Bulb bulb = new Bulb(id, location, color);
+					bulb.frameNumber = Integer.parseInt(line[8]);
+					if (lights.size() <= id) {
+						lights.add(bulb);
+					} else {
+						lights.get(id).addCheckpoint(bulb);
+					}
 				}
-			} else if (command.equals("bulb")) {
-				double x = Double.parseDouble(line[1]);
-				double y = Double.parseDouble(line[2]);
-				double z = Double.parseDouble(line[3]);
-				Color color = new Color(Double.parseDouble(line[4]),
-						Double.parseDouble(line[5]),
-						Double.parseDouble(line[6]));
-				int id = Integer.parseInt(line[7]);
-				Vector location = new Vector(x, y, z);
-				Bulb bulb = new Bulb(id, location, color);
-				bulb.frameNumber = Integer.parseInt(line[8]);
-				if (lights.size() <= id) {
-					lights.add(bulb);
-				} else {
-					lights.get(id).addCheckpoint(bulb);
+				// temp.close();
+				// }
+				else if (command.equals("sphere")) {
+					Vector v = new Vector(Double.parseDouble(line[1]),
+							Double.parseDouble(line[2]),
+							Double.parseDouble(line[3]));
+					double radius = Double.parseDouble(line[4]);
+					Color color = new Color(Double.parseDouble(line[5]),
+							Double.parseDouble(line[6]),
+							Double.parseDouble(line[7]));
+					int id = Integer.parseInt(line[8]);
+					Sphere s = new Sphere(v, radius, color);
+					s.setId(id);
+					s.frameNumber = Integer.parseInt(line[9]);
+					// to see if this is the first sphere of this id
+					// the rest are the same sphere at different states
+					if (obstacles.size() <= id) {
+						obstacles.add(s);
+					} else {
+						obstacles.get(id).addCheckpoint(s);
+					}
+				} else if (command.equals("plane")) {
+					double A = Double.parseDouble(line[1]);
+					double B = Double.parseDouble(line[2]);
+					double C = Double.parseDouble(line[3]);
+					double D = Double.parseDouble(line[4]);
+					Color color = new Color(Double.parseDouble(line[5]),
+							Double.parseDouble(line[6]),
+							Double.parseDouble(line[7]));
+					Plane plane = new Plane(A, B, C, D, color);
+					obstacles.add(plane);
+				} else if (command.equals("planeT")) {
+					// planeT id filename
+					int id = Integer.parseInt(line[1]);
+					String texture = line[2];
+					((Plane)obstacles.get(id)).setTexture(texture);
+				} else if (command.equals("sphereT")) {
+					// sphereT id filename
+					// int id = Integer.parseInt(line[1]);
+					// String texture = line[2];
+					// spheres.get(id).setTexture(texture);
+				} else if (command.equals("vertex")) {
+					double x = lineReader.nextDouble();
+					double y = lineReader.nextDouble();
+					double z = lineReader.nextDouble();
+					double r = lineReader.nextDouble();
+					double g = lineReader.nextDouble();
+					double b = lineReader.nextDouble();
+					Color color = new Color(r, g, b);
+					RayTracer.vertices.add(new Vector(x, y, z, color));
+				} else if (command.equals("triangle")) {
+					int id = lineReader.nextInt();
+					Vector p1 = RayTracer.getVertex(lineReader.nextInt());
+					Vector p2 = RayTracer.getVertex(lineReader.nextInt());
+					Vector p3 = RayTracer.getVertex(lineReader.nextInt());
+					Triangle triangle = new Triangle(id, p1, p2, p3);
+					RayTracer.obstacles.add(triangle);
 				}
-			}
-			// temp.close();
-			// }
-			else if (command.equals("sphere")) {
-				Vector v = new Vector(Double.parseDouble(line[1]),
-						Double.parseDouble(line[2]),
-						Double.parseDouble(line[3]));
-				double radius = Double.parseDouble(line[4]);
-				Color color = new Color(Double.parseDouble(line[5]),
-						Double.parseDouble(line[6]),
-						Double.parseDouble(line[7]));
-				int id = Integer.parseInt(line[8]);
-				Sphere s = new Sphere(v, radius, color);
-				s.setId(id);
-				s.frameNumber = Integer.parseInt(line[9]);
-				if (spheres.size() <= id) {
-					spheres.add(s);
-				} else {
-					spheres.get(id).addCheckpoint(s);
-				}
-			} else if (command.equals("plane")) {
-				double A = Double.parseDouble(line[1]);
-				double B = Double.parseDouble(line[2]);
-				double C = Double.parseDouble(line[3]);
-				double D = Double.parseDouble(line[4]);
-				Color color = new Color(Double.parseDouble(line[5]),
-						Double.parseDouble(line[6]),
-						Double.parseDouble(line[7]));
-				Plane plane = new Plane(A, B, C, D, color);
-				planes.add(plane);
-			} else if (command.equals("planeT")) {
-				// planeT id filename
-				int id = Integer.parseInt(line[1]);
-				String texture = line[2];
-				planes.get(id).setTexture(texture);
-			} else if (command.equals("sphereT")) {
-				// sphereT id filename
-//				int id = Integer.parseInt(line[1]);
-//				String texture = line[2];
-				// spheres.get(id).setTexture(texture);
 			}
 		}
 
 		for (int i = 0; i < framesNum; i++) {
-
-			obstacles.clear();
-			obstacles.addAll(planes);
 			Color clearColor = new Color(0, 0, 0, 0);
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
@@ -269,29 +193,9 @@ public class RayTracer {
 					Vector closestLocation = null;
 					// find intersections with spheres
 
-					for (Moveable m : spheres) {
-						if (m.moveableOverFrames.size() > 0) {
-							Sphere sphere = (Sphere) m.getState(i);
-							double intersect = sphere.findIntersection(ray);
-							// double intersect = RayTracer.RayIntersectSphere(
-							// ray, sphere);
-							if (intersect >= 0 && intersect < closest) {
-								closest = intersect;
-								Vector location = ray.scale(intersect);
-								closestNormal = sphere.getNormal(location)
-										.normalize();
-								closestColor = sphere.getColor(ray.getOrigin()
-										.add(ray.getDirection()
-												.scale(intersect)));
-								closestObject = sphere;
-								closestLocation = location;
-								if(i == sphere.frameNumber){
-								obstacles.add(sphere);}
-							}
-						}
-					}
 
 					for (Obstacle obstacle : obstacles) {
+						obstacle = (Obstacle) obstacle.getState(i);
 						double intersect = obstacle.findIntersection(ray);
 						if (intersect >= 0 && intersect < closest) {
 							closest = intersect;
@@ -310,9 +214,9 @@ public class RayTracer {
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
 						for (int a = 0; a < numSampleRays; a++) {
-//							Ray currentSampleRay = RayTracer
-//									.generateRandomRay(closestLocation);
-//							int currentSampleNumBounces = 0;
+							// Ray currentSampleRay = RayTracer
+							// .generateRandomRay(closestLocation);
+							// int currentSampleNumBounces = 0;
 							Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
 							// Color gFactor =
@@ -414,8 +318,11 @@ public class RayTracer {
 
 	// I (Stephen) just cobbled this method together...how should we
 	// structure our code?
+	// KW: There have been a lot of untested changes to this method since its
+	// not actually used yet. It is composed mainly of chunks of code from the main method.
+	// If/when we decide to use it, lets repaste those chunks in case we failed to propogate
+	// changes correctly. (And then delete relevent chunks from main method)
 	public static Vector findIntersection(Ray ray, int frame) {
-		obstacles = new ArrayList<Obstacle>();
 		double closest = Double.POSITIVE_INFINITY;
 		Vector closestNormal = null;
 		Color closestColor = null;
@@ -424,6 +331,7 @@ public class RayTracer {
 		closestLocation.setLight(false);
 		// find intersections with spheres
 		for (Obstacle obstacle : obstacles) {
+			obstacle = (Obstacle) obstacle.getState(frame);
 			double intersect = obstacle.findIntersection(ray);
 			if (intersect >= 0 && intersect < closest) {
 				closest = intersect;
@@ -432,44 +340,28 @@ public class RayTracer {
 				closestColor = obstacle.getColor(ray.getOrigin().add(
 						ray.getDirection().scale(intersect)));
 				closestObject = obstacle;
-//				 for (Moveable m : spheres) {
-//				 Sphere sphere = (Sphere) m.getState(frame);
-//				 // double intersect = RayTracer.RayIntersectSphere(ray,
-////				 sphere);
-//				 double intersect = sphere.findIntersection(ray);
-//				 if (intersect >= 0 && intersect < closest) {
-//				 closest = intersect;
-//				 Vector location = ray.scale(intersect);
-//				 closestNormal = sphere.getNormal(location).normalize();
-//				 closestColor = sphere.getColor(ray.getOrigin().add(
-//				 ray.getDirection().scale(intersect)));
-//				 closestObject = sphere;
-				
-				 closestLocation = location;
-				 closestLocation.setClosestNormal(closestNormal);
-				 closestLocation.setClosestObject(closestObject);
-				 closestLocation.setLight(false);
-				 closestLocation.setColor(closestColor);
-				 }
-				 }
+				// for (Moveable m : spheres) {
+				// Sphere sphere = (Sphere) m.getState(frame);
+				// // double intersect = RayTracer.RayIntersectSphere(ray,
+				// // sphere);
+				// double intersect = sphere.findIntersection(ray);
+				// if (intersect >= 0 && intersect < closest) {
+				// closest = intersect;
+				// Vector location = ray.scale(intersect);
+				// closestNormal = sphere.getNormal(location).normalize();
+				// closestColor = sphere.getColor(ray.getOrigin().add(
+				// ray.getDirection().scale(intersect)));
+				// closestObject = sphere;
 
-				// find intersections with planes
-				 for (Plane plane : planes) {
-				 double intersect = plane.findIntersection(ray);
-				 // double intersect = RayTracer.RayIntersectPlane(ray,
-//				 plane);
-				 if (intersect >= 0 && intersect < closest) {
-				 closest = intersect;
-//				  closestNormal = plane.getNormal().normalize();
-//				  closestColor = plane.getColor();
-				 closestObject = plane;
-				 closestLocation = ray.scale(intersect);
-				 closestLocation.setClosestNormal(closestNormal);
-				 closestLocation.setClosestObject(closestObject);
-				 closestLocation.setLight(false);
-				 closestLocation.setColor(closestColor);
+				closestLocation = location;
+				closestLocation.setClosestNormal(closestNormal);
+				closestLocation.setClosestObject(closestObject);
+				closestLocation.setLight(false);
+				closestLocation.setColor(closestColor);
 			}
 		}
+
+
 
 		return closestLocation;
 	}
@@ -534,5 +426,13 @@ public class RayTracer {
 				intersection.getClosestObject(), intersection, frame);
 		gFactor.multiplyColors(diffuse);
 		return gFactor;
+	}
+
+	public static Vector getVertex(int index) {
+		if (index >= 0) {
+			return RayTracer.vertices.get(index);
+		}
+		return new Vector(RayTracer.vertices.get(RayTracer.vertices.size()
+				+ index));
 	}
 }

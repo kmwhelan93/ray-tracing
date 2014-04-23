@@ -8,3 +8,7 @@ sphere 1 0 -1 0.3 1 0.5 0 0 10
 sphere 0 0 -1 0.5 1 0.3 0 1 10
 plane 1 1 0.5 0.5 0 1 0
 plane 0 1 2 3 1 0 1
+vertex -1 -2 -1.5    1 0 0
+vertex 1 1 -1    0 1 0
+vertex -1 1 -2	0 0 1
+triangle 12 -3 -2 -1
