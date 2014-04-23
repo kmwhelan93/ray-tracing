@@ -17,7 +17,7 @@ public class RayTracer {
 	// TODO change to real number; set to one for debugging...
 	private static int numSampleRays = 1;// Number of sample rays shot into
 											// scene after initial intersection;
-	private static Color testColor = new Color(0, 0, 0, 255);
+	private static Color zeroColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
 	private static Moveable eye = new Eye(new Vector(0, 0, 0));
 	private static Vector forward = new Vector(0, 0, -1);
@@ -222,7 +222,7 @@ public class RayTracer {
 							// Color gFactor =
 							// globalFactor(currentSampleRay,
 							// currentSampleNumBounces, i);
-							if (gFactor.equals(testColor)) {
+							if (gFactor.equals(zeroColor)) {
 								numFactoredSampleRays -= 1;
 								continue;
 							}
@@ -374,7 +374,7 @@ public class RayTracer {
 	public static Color globalFactor(Ray sampleRay, int numBounces, int frame) {
 		numBounces++;
 		if (numBounces == maxSampleRayBounces)
-			return testColor;
+			return zeroColor;
 		Vector intersection = findIntersection(sampleRay, frame);
 		if (intersection.getLight())
 			return intersection.getColor();
