@@ -210,6 +210,9 @@ public class RayTracer {
 						int numFactoredSampleRays = numSampleRays;
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
+						toColor = RayTracer.diffuseLightCalc(closestNormal,
+								closestColor, closestObject,
+								closestLocation, i);
 						for (int a = 0; a < numSampleRays; a++) {
 							Ray currentSampleRay = RayTracer
 									.generateRandomRay(closestLocation);
@@ -223,44 +226,6 @@ public class RayTracer {
 								numFactoredSampleRays -= 1;
 								continue;
 							}
-							// might invert Color
-							boolean inverted = false;
-							if (closestNormal.dotProduct(eye.getState(i)
-									.getVector().subtract(closestLocation)) < 0) {
-								closestColor = closestColor.invert();
-								inverted = true;
-							}
-							// apply lighting
-							// add method that takes in light vector and
-							// make a
-							// light
-							// interface
-							RayTracer.diffuseLightCalc(closestNormal,
-									closestColor, closestObject,
-									closestLocation, i);
-							for (Moveable m : lights) {
-								if (m.moveableOverFrames.size() > 0) {
-									Light light = (Light) m.getState(i);
-									if (!RayTracer.isLightBlocked(light,
-											closestLocation, closestObject, i)) {
-										double nDotI = closestNormal
-												.normalize()
-												.dotProduct(
-														light.getDirection(
-																closestLocation)
-																.normalize());
-										if ((nDotI > 0 && !inverted)
-												|| (inverted && nDotI < 0)) {
-											toColor = toColor.add(closestColor
-													.multiplyColors(
-															light.getColor())
-													.multiply(nDotI));
-										}
-
-									}
-								}
-							}
-
 							toColor.multiplyColors(gFactor);
 							sumColor.add(toColor);
 						}
