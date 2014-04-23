@@ -107,7 +107,8 @@ public class RayTracer {
 				}
 				// temp.close();
 				// }
-				else if (command.equals("sphere")) {
+				else if (command.equals("sphere") || command.equals("sphereB")
+						|| command.equals("sphereT")) {
 					Vector v = new Vector(Double.parseDouble(line[1]),
 							Double.parseDouble(line[2]),
 							Double.parseDouble(line[3]));
@@ -119,6 +120,11 @@ public class RayTracer {
 					Sphere s = new Sphere(v, radius, color);
 					s.setId(id);
 					s.frameNumber = Integer.parseInt(line[9]);
+					if (command.equals("sphereB")) {
+						s.setBumpMap(line[10]);
+					} else if (command.equals("sphereT")) {
+						s.setTexture(line[10]);
+					}
 					// to see if this is the first sphere of this id
 					// the rest are the same sphere at different states
 					if (obstacles.size() <= id) {
@@ -126,7 +132,8 @@ public class RayTracer {
 					} else {
 						obstacles.get(id).addCheckpoint(s);
 					}
-				} else if (command.equals("plane")) {
+				} else if (command.equals("plane") || command.equals("planeB")
+						|| command.equals("planeT")) {
 					double A = Double.parseDouble(line[1]);
 					double B = Double.parseDouble(line[2]);
 					double C = Double.parseDouble(line[3]);
@@ -135,17 +142,12 @@ public class RayTracer {
 							Double.parseDouble(line[6]),
 							Double.parseDouble(line[7]));
 					Plane plane = new Plane(A, B, C, D, color);
+					if (command.equals("planeB")) {
+						plane.setBumpMap(line[8]);
+					} else if (command.equals("planeT")) {
+						plane.setTexture(line[8]);
+					}
 					obstacles.add(plane);
-				} else if (command.equals("planeT")) {
-					// planeT id filename
-					int id = Integer.parseInt(line[1]);
-					String texture = line[2];
-					((Plane) obstacles.get(id)).setTexture(texture);
-				} else if (command.equals("sphereT")) {
-					// sphereT id filename
-					// int id = Integer.parseInt(line[1]);
-					// String texture = line[2];
-					// spheres.get(id).setTexture(texture);
 				} else if (command.equals("vertex")) {
 					double x = lineReader.nextDouble();
 					double y = lineReader.nextDouble();
