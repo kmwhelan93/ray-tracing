@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Sphere implements Obstacle {
+public class Sphere extends Moveable implements Obstacle {
 	private Vector center;
 	private Color color;
 	private BufferedImage texture;
@@ -28,7 +28,6 @@ public class Sphere implements Obstacle {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
 	// New get color method to add in texture mapping
 	// Parameters: vector representation of point on sphere we're coloring, 
 	// 		pass null for original color
@@ -76,7 +75,6 @@ public class Sphere implements Obstacle {
 	public BufferedImage getTexture() {
 		return this.texture;
 	}
-	
 	public void setTexture(String filename) {
 		try {
 			this.texture = ImageIO.read(new File(filename));
@@ -174,4 +172,12 @@ public class Sphere implements Obstacle {
 		return -1;
 	}
 
+	public Vector getVector() {
+		return this.getCenter();
+	}
+
+	@Override
+	public Color getColor() {
+		return this.color;
+	}
 }

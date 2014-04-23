@@ -13,4 +13,15 @@ public class Bulb extends Light {
 		return this.location.subtract(objectLocation);
 	}
 
+	@Override
+	public Vector getVector() {
+		return this.location;
+	}
+
+	@Override
+	public double getRadius() {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
 }

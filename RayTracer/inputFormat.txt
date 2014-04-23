@@ -1,21 +1,10 @@
-Text File 1:
+Text File Format:
 
 imageFormat width height numberOfFrames FileName.ext
-eye x y z
-forward x y z
-up x y z
-sun x y z r g b idNumber
-bulb x y z r g b idNumber
-sphere x y z radius r g b idNumber
-plane A B C D r g b idNumber
-
-
-Text File 2:
-
-object startFrame endFrame x y z
-eye startFrame endFrame x y z
-sun startFrame endFrame x y z r g b idNumber
-bulb startFrame endFrame x y z r g b idNumber
-sphere startFrame endFrame x y z r g b idNumber
-
-//Currently, every frame for every object must be accounted for!
+eye x y z frameNumber
+forward x y z frameNumber
+up x y z frameNumber
+sun x y z r g b idNumber frameNumber
+bulb x y z r g b idNumber frameNumber
+sphere x y z radius r g b idNumber frameNumber
+plane A B C D r g b

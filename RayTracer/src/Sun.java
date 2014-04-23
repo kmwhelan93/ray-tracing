@@ -1,4 +1,4 @@
-public class Sun extends Light {
+public class Sun extends Light{
 	private Vector direction;
 
 	@Override
@@ -15,6 +15,17 @@ public class Sun extends Light {
 		this.direction = direction;
 		this.color = color;
 	}
+
+	@Override
+	public Vector getVector() {
+		return this.direction;
+	}
+
+	@Override
+	public double getRadius() {
+		return -1;
+	}
+
 	
 	
 
