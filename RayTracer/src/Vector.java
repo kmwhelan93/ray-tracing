@@ -114,7 +114,7 @@ public class Vector extends Matrix {
 	}
 	public Vector add(Vector v) {
 		Vector result = new Vector(v.size());
-		for (int i = 0; i < this.size(); i ++) {
+		for (int i = 0; i < Math.min(this.size(),v.size()); i ++) {
 			result.set(i, this.get(i) + v.get(i));
 		}
 		return result;
@@ -126,7 +126,7 @@ public class Vector extends Matrix {
 		 * if (this.size() != v.size()) {
 			throw new Exception();
 		}*/
-		for (int i = 0; i < this.size(); i ++) {
+		for (int i = 0; i < Math.min(this.size(),v.size()); i ++) {
 			result.set(i, this.get(i) - v.get(i));
 		}
 		return result;
@@ -134,7 +134,7 @@ public class Vector extends Matrix {
 	
 	public Vector divide(Vector v) {
 		Vector result = new Vector(v.size());
-		for (int i = 0; i < this.size(); i ++) {
+		for (int i = 0; i < Math.min(this.size(),v.size()); i ++) {
 			result.set(i, this.get(i) / v.get(i));
 		}
 		return result;

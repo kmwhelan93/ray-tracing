@@ -12,13 +12,12 @@ public class RayTracer {
 	private static int height;
 	private static BufferedImage b;
 	private static WritableRaster r;
-	private static int maxSampleRayBounces = 10;// Number of times a sample ray
+	private static int maxSampleRayBounces = 1;// Number of times a sample ray
 												// is allowed to bounce in
 												// scene; can be tweaked
-	// TODO change to real number; set to one for debugging...
-	private static int numSampleRays = 1;// Number of sample rays shot into
+	private static int numSampleRays = 10;// Number of sample rays shot into
 											// scene after initial intersection;
-	private static Color testColor = new Color(0, 0, 0, 255);
+	private static Color zeroColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
 	private static Moveable eye = new Eye(new Vector(0, 0, 0));
 	private static Vector forward = new Vector(0, 0, -1);
@@ -109,7 +108,8 @@ public class RayTracer {
 				}
 				// temp.close();
 				// }
-				else if (command.equals("sphere")) {
+				else if (command.equals("sphere") || command.equals("sphereB")
+						|| command.equals("sphereT")) {
 					Vector v = new Vector(Double.parseDouble(line[1]),
 							Double.parseDouble(line[2]),
 							Double.parseDouble(line[3]));
@@ -121,6 +121,11 @@ public class RayTracer {
 					Sphere s = new Sphere(v, radius, color);
 					s.setId(id);
 					s.frameNumber = Integer.parseInt(line[9]);
+					if (command.equals("sphereB")) {
+						s.setBumpMap(line[10]);
+					} else if (command.equals("sphereT")) {
+						s.setTexture(line[10]);
+					}
 					// to see if this is the first sphere of this id
 					// the rest are the same sphere at different states
 					if (obstacles.size() <= id) {
@@ -128,7 +133,8 @@ public class RayTracer {
 					} else {
 						obstacles.get(id).addCheckpoint(s);
 					}
-				} else if (command.equals("plane")) {
+				} else if (command.equals("plane") || command.equals("planeB")
+						|| command.equals("planeT")) {
 					double A = Double.parseDouble(line[1]);
 					double B = Double.parseDouble(line[2]);
 					double C = Double.parseDouble(line[3]);
@@ -137,17 +143,12 @@ public class RayTracer {
 							Double.parseDouble(line[6]),
 							Double.parseDouble(line[7]));
 					Plane plane = new Plane(A, B, C, D, color);
+					if (command.equals("planeB")) {
+						plane.setBumpMap(line[8]);
+					} else if (command.equals("planeT")) {
+						plane.setTexture(line[8]);
+					}
 					obstacles.add(plane);
-				} else if (command.equals("planeT")) {
-					// planeT id filename
-					int id = Integer.parseInt(line[1]);
-					String texture = line[2];
-					((Plane) obstacles.get(id)).setTexture(texture);
-				} else if (command.equals("sphereT")) {
-					// sphereT id filename
-					// int id = Integer.parseInt(line[1]);
-					// String texture = line[2];
-					// spheres.get(id).setTexture(texture);
 				} else if (command.equals("vertex")) {
 					double x = lineReader.nextDouble();
 					double y = lineReader.nextDouble();
@@ -204,8 +205,6 @@ public class RayTracer {
 					Color closestColor = null;
 					Object closestObject = null;
 					Vector closestLocation = null;
-					// find intersections with spheres
-
 					for (Obstacle obstacle : obstacles) {
 						obstacle = (Obstacle) obstacle.getState(i);
 						double intersect = obstacle.findIntersection(ray);
@@ -225,56 +224,28 @@ public class RayTracer {
 						int numFactoredSampleRays = numSampleRays;
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
+						toColor = RayTracer
+								.diffuseLightCalc(closestNormal, closestColor,
+										closestObject, closestLocation, i);
 						for (int a = 0; a < numSampleRays; a++) {
-							// Ray currentSampleRay = RayTracer
-							// .generateRandomRay(closestLocation);
-							// int currentSampleNumBounces = 0;
-							Color gFactor = new Color(1, 1, 1, 255);
+							Ray currentSampleRay = RayTracer
+									.generateRandomRay(closestLocation);
+							int currentSampleNumBounces = 0;
+							// Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
-							// Color gFactor =
-							// globalFactor(currentSampleRay,
-							// currentSampleNumBounces, i);
-							if (gFactor.equals(testColor)) {
-								numFactoredSampleRays -= 1;
-								continue;
-							}
-							// might invert Color
-							boolean inverted = false;
-							if (closestNormal.dotProduct(eye.getState(i)
-									.getVector().subtract(closestLocation)) < 0) {
-								closestColor = closestColor.invert();
-								inverted = true;
-							}
-							// apply lighting
-							// add method that takes in light vector and
-							// make a
-							// light
-							// interface
-							for (Moveable m : lights) {
-								if (m.moveableOverFrames.size() > 0) {
-									Light light = (Light) m.getState(i);
-									if (!RayTracer.isLightBlocked(light,
-											closestLocation, closestObject, i)) {
-										double nDotI = closestNormal
-												.normalize()
-												.dotProduct(
-														light.getDirection(
-																closestLocation)
-																.normalize());
-										if ((nDotI > 0 && !inverted)
-												|| (inverted && nDotI < 0)) {
-											toColor = toColor.add(closestColor
-													.multiplyColors(
-															light.getColor())
-													.multiply(nDotI));
-										}
+							Color gFactor = globalFactor(currentSampleRay,
+									currentSampleNumBounces, i);
+							if (gFactor == null) {
 
-									}
+							} else {
+								if (gFactor.equals(zeroColor)) {
+									numFactoredSampleRays -= 1;
+									continue;
 								}
+								toColor.multiplyColors(gFactor);
+								sumColor.add(toColor);
 							}
 
-							toColor.multiplyColors(gFactor);
-							sumColor.add(toColor);
 						}
 						sumColor.divide(numFactoredSampleRays);
 						r.setPixel(col, row, toColor.getColorArray());
@@ -372,14 +343,15 @@ public class RayTracer {
 				closestLocation.setClosestObject(closestObject);
 				closestLocation.setLight(false);
 				closestLocation.setColor(closestColor);
+			} else {
+				closestLocation = null;
 			}
 		}
-
 		return closestLocation;
 	}
 
 	// Cobbled this method too...see above method comment
-	public static Color diffuseLightCalc(int i, Vector closestNormal,
+	public static Color diffuseLightCalc(Vector closestNormal,
 			Color closestColor, Object closestObject, Vector closestLocation,
 			int frame) {
 		Color toColor = new Color(0, 0, 0, 255);
@@ -390,14 +362,11 @@ public class RayTracer {
 			closestColor = closestColor.invert();
 			inverted = true;
 		}
-		// apply lighting
-		// add method that takes in light vector and make a
-		// light
-		// interface
+		// apply lighting, use light interface...
 		for (Moveable m : lights) {
 			Light light = (Light) m.getState(frame);
 			if (!RayTracer.isLightBlocked(light, closestLocation,
-					closestObject, i)) {
+					closestObject, frame)) {
 				double nDotI = closestNormal.normalize().dotProduct(
 						light.getDirection(closestLocation).normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
@@ -416,7 +385,7 @@ public class RayTracer {
 		double x = Math.toDegrees(Math.sin(phi) * Math.cos(theta));
 		double y = Math.toDegrees(Math.sin(phi) * Math.sin(theta));
 		double z = Math.toDegrees(Math.cos(phi));
-		Ray random = new Ray(location, new Vector(x, y, z));
+		Ray random = new Ray(location, new Vector(x, y, z, 1));
 		return random;
 	}
 
@@ -424,20 +393,27 @@ public class RayTracer {
 	public static Color globalFactor(Ray sampleRay, int numBounces, int frame) {
 		numBounces++;
 		if (numBounces == maxSampleRayBounces)
-			return testColor;
+			return zeroColor;
+		if (sampleRay.getOrigin().size() == 0)
+			return zeroColor;
 		Vector intersection = findIntersection(sampleRay, frame);
-		if (intersection.getLight())
-			return intersection.getColor();
-		sampleRay = generateRandomRay(intersection);
-		Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively
-																	// shoot
-																	// rays into
-																	// scene
-		Color diffuse = diffuseLightCalc(frame,
-				intersection.getClosestNormal(), intersection.getColor(),
-				intersection.getClosestObject(), intersection, frame);
-		gFactor.multiplyColors(diffuse);
-		return gFactor;
+		if (intersection == null) {
+			return zeroColor;
+		} else {
+			if (intersection.getLight())
+				return intersection.getColor();
+			sampleRay = generateRandomRay(intersection);
+			Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively
+																		// shoot
+																		// rays
+																		// into
+																		// scene
+			Color diffuse = diffuseLightCalc(intersection.getClosestNormal(),
+					intersection.getColor(), intersection.getClosestObject(),
+					intersection, frame);
+			gFactor.multiplyColors(diffuse);
+			return gFactor;
+		}
 	}
 
 	public static Vector getVertex(int index) {

@@ -2,8 +2,10 @@ import java.util.ArrayList;
 
 public abstract class Moveable {
 
-	// ALSO: note that I (KW) made Planes Moveable. This is so all obstacles can be treated
-	// the same way. Since Planes have an empty moveableOverFrames, this shouldn't be a problem.
+	// ALSO: note that I (KW) made Planes Moveable. This is so all obstacles can
+	// be treated
+	// the same way. Since Planes have an empty moveableOverFrames, this
+	// shouldn't be a problem.
 	ArrayList<Moveable> moveableOverFrames;
 	int frameNumber;
 	int id;
@@ -19,6 +21,7 @@ public abstract class Moveable {
 		moveableOverFrames.add(m);
 		this.frameNumber = frameNumber;
 	}
+
 	// Note: Triangles and Spheres don't have this
 	public abstract Vector getVector();
 
@@ -28,7 +31,7 @@ public abstract class Moveable {
 	public void addCheckpoint(Moveable m) {
 		moveableOverFrames.add(m);
 	}
-	
+
 	public abstract Color getColor();
 
 	Moveable getState(int frameNumber) {
@@ -36,12 +39,12 @@ public abstract class Moveable {
 			for (int i = 0; i < moveableOverFrames.size() - 1; i++) {
 				if (frameNumber >= moveableOverFrames.get(i).frameNumber
 						&& frameNumber <= moveableOverFrames.get(i + 1).frameNumber) {
-					
-//					System.out.println("FRAME: " + frameNumber);
-//					System.out.println("FIRST: "
-//							+ moveableOverFrames.get(i).getVector());
-//					System.out.println("SECOND: "
-//							+ moveableOverFrames.get(i + 1).getVector());
+
+					// System.out.println("FRAME: " + frameNumber);
+					// System.out.println("FIRST: "
+					// + moveableOverFrames.get(i).getVector());
+					// System.out.println("SECOND: "
+					// + moveableOverFrames.get(i + 1).getVector());
 
 					double framePoint = (double) frameNumber
 							/ ((double) moveableOverFrames.get(i + 1).frameNumber - moveableOverFrames
@@ -60,7 +63,7 @@ public abstract class Moveable {
 									+ moveableOverFrames.get(i).getVector()
 											.get(2));
 
-//					System.out.println("NEW VECTOR: " + v + "\n");
+					// System.out.println("NEW VECTOR: " + v + "\n");
 
 					double red = ((moveableOverFrames.get(i + 1).getColor()
 							.getRed() - moveableOverFrames.get(i).getColor()
@@ -92,13 +95,17 @@ public abstract class Moveable {
 								.getRadius() - moveableOverFrames.get(i)
 								.getRadius()) * framePoint)
 								+ moveableOverFrames.get(i).getRadius();
-						return new Sphere(v, radius, color);
+						Sphere s = new Sphere(v, radius, color);
+						s.setBumpMap(((Sphere) this).getBumpMap());
+
+						return s;
 					}
 
 				}
 
 			}
 		}
+
 		return this;
 
 	}
