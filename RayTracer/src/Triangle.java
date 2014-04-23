@@ -71,13 +71,13 @@ public class Triangle extends Obstacle {
 			Vector e2 = p3.subtract(p2);
 			Vector e3 = p1.subtract(p3);
 			// vectors pointing into center of triangle
-			Vector a1 = e1.crossProduct(normal);
-			Vector a2 = e2.crossProduct(normal);
-			Vector a3 = e3.crossProduct(normal);
+			Vector a1 = e1.crossProduct(normal).normalize();
+			Vector a2 = e2.crossProduct(normal).normalize();
+			Vector a3 = e3.crossProduct(normal).normalize();
 			// bi says how close pt is to pi
-			double b1 = a1.dotProduct(pt.subtract(p1));
-			double b2 = a2.dotProduct(pt.subtract(p2));
-			double b3 = a3.dotProduct(pt.subtract(p3));
+			double b1 = a1.dotProduct(pt.subtract(p1).normalize());
+			double b2 = a2.dotProduct(pt.subtract(p2).normalize());
+			double b3 = a3.dotProduct(pt.subtract(p3).normalize());
 			return p1.getColor().multiply(b1).add(p2.getColor().multiply(b2)).add(p3.getColor().multiply(b3));
 		}
 
