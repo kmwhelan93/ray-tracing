@@ -210,24 +210,28 @@ public class RayTracer {
 						int numFactoredSampleRays = numSampleRays;
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
-						toColor = RayTracer.diffuseLightCalc(closestNormal,
-								closestColor, closestObject,
-								closestLocation, i);
+						toColor = RayTracer
+								.diffuseLightCalc(closestNormal, closestColor,
+										closestObject, closestLocation, i);
 						for (int a = 0; a < numSampleRays; a++) {
 							Ray currentSampleRay = RayTracer
 									.generateRandomRay(closestLocation);
 							int currentSampleNumBounces = 0;
-							Color gFactor = new Color(1, 1, 1, 255);
+							// Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
-							// Color gFactor =
-							// globalFactor(currentSampleRay,
-							// currentSampleNumBounces, i);
-							if (gFactor.equals(zeroColor)) {
-								numFactoredSampleRays -= 1;
-								continue;
+							Color gFactor = globalFactor(currentSampleRay,
+									currentSampleNumBounces, i);
+							if (gFactor == null) {
+
+							} else {
+								if (gFactor.equals(zeroColor)) {
+									numFactoredSampleRays -= 1;
+									continue;
+								}
+								toColor.multiplyColors(gFactor);
+								sumColor.add(toColor);
 							}
-							toColor.multiplyColors(gFactor);
-							sumColor.add(toColor);
+
 						}
 						sumColor.divide(numFactoredSampleRays);
 						r.setPixel(col, row, toColor.getColorArray());
@@ -325,9 +329,10 @@ public class RayTracer {
 				closestLocation.setClosestObject(closestObject);
 				closestLocation.setLight(false);
 				closestLocation.setColor(closestColor);
+			} else {
+				closestLocation = null;
 			}
 		}
-
 		return closestLocation;
 	}
 
@@ -366,7 +371,7 @@ public class RayTracer {
 		double x = Math.toDegrees(Math.sin(phi) * Math.cos(theta));
 		double y = Math.toDegrees(Math.sin(phi) * Math.sin(theta));
 		double z = Math.toDegrees(Math.cos(phi));
-		Ray random = new Ray(location, new Vector(x, y, z));
+		Ray random = new Ray(location, new Vector(x, y, z, 1));
 		return random;
 	}
 
@@ -375,19 +380,26 @@ public class RayTracer {
 		numBounces++;
 		if (numBounces == maxSampleRayBounces)
 			return zeroColor;
+		if (sampleRay.getOrigin().size() == 0)
+			return zeroColor;
 		Vector intersection = findIntersection(sampleRay, frame);
-		if (intersection.getLight())
-			return intersection.getColor();
-		sampleRay = generateRandomRay(intersection);
-		Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively
-																	// shoot
-																	// rays into
-																	// scene
-		Color diffuse = diffuseLightCalc(intersection.getClosestNormal(),
-				intersection.getColor(), intersection.getClosestObject(),
-				intersection, frame);
-		gFactor.multiplyColors(diffuse);
-		return gFactor;
+		if (intersection == null) {
+			return zeroColor;
+		} else {
+			if (intersection.getLight())
+				return intersection.getColor();
+			sampleRay = generateRandomRay(intersection);
+			Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively
+																		// shoot
+																		// rays
+																		// into
+																		// scene
+			Color diffuse = diffuseLightCalc(intersection.getClosestNormal(),
+					intersection.getColor(), intersection.getClosestObject(),
+					intersection, frame);
+			gFactor.multiplyColors(diffuse);
+			return gFactor;
+		}
 	}
 
 	public static Vector getVertex(int index) {
