@@ -141,7 +141,7 @@ public class RayTracer {
 					// planeT id filename
 					int id = Integer.parseInt(line[1]);
 					String texture = line[2];
-					((Plane)obstacles.get(id)).setTexture(texture);
+					((Plane) obstacles.get(id)).setTexture(texture);
 				} else if (command.equals("sphereT")) {
 					// sphereT id filename
 					// int id = Integer.parseInt(line[1]);
@@ -191,9 +191,6 @@ public class RayTracer {
 					Color closestColor = null;
 					Object closestObject = null;
 					Vector closestLocation = null;
-					// find intersections with spheres
-
-
 					for (Obstacle obstacle : obstacles) {
 						obstacle = (Obstacle) obstacle.getState(i);
 						double intersect = obstacle.findIntersection(ray);
@@ -214,9 +211,9 @@ public class RayTracer {
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
 						for (int a = 0; a < numSampleRays; a++) {
-							// Ray currentSampleRay = RayTracer
-							// .generateRandomRay(closestLocation);
-							// int currentSampleNumBounces = 0;
+							Ray currentSampleRay = RayTracer
+									.generateRandomRay(closestLocation);
+							int currentSampleNumBounces = 0;
 							Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
 							// Color gFactor =
@@ -238,6 +235,9 @@ public class RayTracer {
 							// make a
 							// light
 							// interface
+							RayTracer.diffuseLightCalc(closestNormal,
+									closestColor, closestObject,
+									closestLocation, i);
 							for (Moveable m : lights) {
 								if (m.moveableOverFrames.size() > 0) {
 									Light light = (Light) m.getState(i);
@@ -319,8 +319,10 @@ public class RayTracer {
 	// I (Stephen) just cobbled this method together...how should we
 	// structure our code?
 	// KW: There have been a lot of untested changes to this method since its
-	// not actually used yet. It is composed mainly of chunks of code from the main method.
-	// If/when we decide to use it, lets repaste those chunks in case we failed to propogate
+	// not actually used yet. It is composed mainly of chunks of code from the
+	// main method.
+	// If/when we decide to use it, lets repaste those chunks in case we failed
+	// to propogate
 	// changes correctly. (And then delete relevent chunks from main method)
 	public static Vector findIntersection(Ray ray, int frame) {
 		double closest = Double.POSITIVE_INFINITY;
@@ -361,13 +363,11 @@ public class RayTracer {
 			}
 		}
 
-
-
 		return closestLocation;
 	}
 
 	// Cobbled this method too...see above method comment
-	public static Color diffuseLightCalc(int i, Vector closestNormal,
+	public static Color diffuseLightCalc(Vector closestNormal,
 			Color closestColor, Object closestObject, Vector closestLocation,
 			int frame) {
 		Color toColor = new Color(0, 0, 0, 255);
@@ -378,14 +378,11 @@ public class RayTracer {
 			closestColor = closestColor.invert();
 			inverted = true;
 		}
-		// apply lighting
-		// add method that takes in light vector and make a
-		// light
-		// interface
+		// apply lighting, use light interface...
 		for (Moveable m : lights) {
 			Light light = (Light) m.getState(frame);
 			if (!RayTracer.isLightBlocked(light, closestLocation,
-					closestObject, i)) {
+					closestObject, frame)) {
 				double nDotI = closestNormal.normalize().dotProduct(
 						light.getDirection(closestLocation).normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
@@ -421,9 +418,9 @@ public class RayTracer {
 																	// shoot
 																	// rays into
 																	// scene
-		Color diffuse = diffuseLightCalc(frame,
-				intersection.getClosestNormal(), intersection.getColor(),
-				intersection.getClosestObject(), intersection, frame);
+		Color diffuse = diffuseLightCalc(intersection.getClosestNormal(),
+				intersection.getColor(), intersection.getClosestObject(),
+				intersection, frame);
 		gFactor.multiplyColors(diffuse);
 		return gFactor;
 	}
