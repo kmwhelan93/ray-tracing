@@ -11,11 +11,10 @@ public class RayTracer {
 	private static int height;
 	private static BufferedImage b;
 	private static WritableRaster r;
-	private static int maxSampleRayBounces = 10;// Number of times a sample ray
+	private static int maxSampleRayBounces = 1;// Number of times a sample ray
 												// is allowed to bounce in
 												// scene; can be tweaked
-	// TODO change to real number; set to one for debugging...
-	private static int numSampleRays = 1;// Number of sample rays shot into
+	private static int numSampleRays = 10;// Number of sample rays shot into
 											// scene after initial intersection;
 	private static Color zeroColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
