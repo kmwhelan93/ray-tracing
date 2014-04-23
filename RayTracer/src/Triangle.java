@@ -24,6 +24,7 @@ public class Triangle extends Obstacle {
 		double d =-1*( p1.dotProduct(normal));
 		Plane p = new Plane(normal.get(0), normal.get(1), normal.get(2), d, null);
 		double t = p.findIntersection(ray);
+//		System.out.println("ray: " + ray);
 		Vector intersectionPoint = ray.scale(t);
 //		System.out.println(intersectionPoint);
 //		try {
@@ -43,6 +44,7 @@ public class Triangle extends Obstacle {
 //		System.out.println("a1: " + a1);
 //		System.out.println("a2: " + a2);
 //		System.out.println("a3: " + a3);
+//		System.out.println(a1.size() + " " + p1.size() + " " + intersectionPoint.size());
 		double dp1 = a1.dotProduct(intersectionPoint.subtract(p1));
 		double dp2 = a2.dotProduct(intersectionPoint.subtract(p2));
 		double dp3 = a3.dotProduct(intersectionPoint.subtract(p3));
