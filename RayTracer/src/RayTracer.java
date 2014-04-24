@@ -118,7 +118,8 @@ public class RayTracer {
 							Double.parseDouble(line[6]),
 							Double.parseDouble(line[7]));
 					int id = Integer.parseInt(line[8]);
-					Sphere s = new Sphere(v, radius, color);
+					Sphere s = new Sphere(v, radius, color,
+							Double.parseDouble(line[11]));
 					s.setId(id);
 					s.frameNumber = Integer.parseInt(line[9]);
 					if (command.equals("sphereB")) {
@@ -142,7 +143,8 @@ public class RayTracer {
 					Color color = new Color(Double.parseDouble(line[5]),
 							Double.parseDouble(line[6]),
 							Double.parseDouble(line[7]));
-					Plane plane = new Plane(A, B, C, D, color);
+					double reflectiveness = Double.parseDouble(line[8]);
+					Plane plane = new Plane(A, B, C, D, color, reflectiveness);
 					if (command.equals("planeB")) {
 						plane.setBumpMap(line[8]);
 					} else if (command.equals("planeT")) {
@@ -163,19 +165,24 @@ public class RayTracer {
 					Vector p1;
 					Vector p2;
 					Vector p3;
+					double reflectiveness;
 					if (!nextLine.contains(":")) {
 						id = lineReader.nextInt();
 						p1 = RayTracer.getVertex(lineReader.nextInt());
 						p2 = RayTracer.getVertex(lineReader.nextInt());
 						p3 = RayTracer.getVertex(lineReader.nextInt());
+						reflectiveness = lineReader.nextDouble();
 					} else {
-						HashMap<String, Double> map = RayTracer.hashLine(lineReader);
+						HashMap<String, Double> map = RayTracer
+								.hashLine(lineReader);
 						id = map.get("id").intValue();
 						p1 = RayTracer.getVertex(map.get("p1").intValue());
 						p2 = RayTracer.getVertex(map.get("p2").intValue());
 						p3 = RayTracer.getVertex(map.get("p3").intValue());
+						reflectiveness = map.get("reflectiveness");
 					}
-					Triangle triangle = new Triangle(id, p1, p2, p3);
+					Triangle triangle = new Triangle(id, p1, p2, p3,
+							reflectiveness);
 					RayTracer.obstacles.add(triangle);
 				}
 			}
@@ -200,36 +207,16 @@ public class RayTracer {
 							up.scale(t));
 					Ray ray = new Ray(eye.getState(i).getVector(), new Vector(
 							direction));
-					double closest = Double.POSITIVE_INFINITY;
-					Vector closestNormal = null;
-					Color closestColor = null;
-					Object closestObject = null;
-					Vector closestLocation = null;
-					for (Obstacle obstacle : obstacles) {
-						obstacle = (Obstacle) obstacle.getState(i);
-						double intersect = obstacle.findIntersection(ray);
-						if (intersect >= 0 && intersect < closest) {
-							closest = intersect;
-							Vector location = ray.scale(intersect);
-							closestNormal = obstacle.getNormal(location)
-									.normalize();
-							closestColor = obstacle.getColor(ray.getOrigin()
-									.add(ray.getDirection().scale(intersect)));
-							closestObject = obstacle;
-							closestLocation = location;
-						}
-					}
-					if (closestObject != null) {
+					CollisionPoint collisionPoint = RayTracer.findClosestIntersection(ray, i, null);
+					if (collisionPoint != null) {
 						// Global illumination algorithm starts here
 						int numFactoredSampleRays = numSampleRays;
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
-						toColor = RayTracer
-								.diffuseLightCalc(closestNormal, closestColor,
-										closestObject, closestLocation, i);
+						toColor = RayTracer.diffuseLightCalc(collisionPoint, i);
 						for (int a = 0; a < numSampleRays; a++) {
 							Ray currentSampleRay = RayTracer
-									.generateRandomRay(closestLocation);
+									.generateRandomRay(collisionPoint.getLocation());
 							int currentSampleNumBounces = 0;
 							// Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
@@ -278,7 +265,8 @@ public class RayTracer {
 		Vector directionToLight = light.getDirection(objectLocation);
 		Ray rayToLight = new Ray(objectLocation, directionToLight);
 		for (Obstacle obstacle : obstacles) {
-			double t = ((Obstacle)obstacle.getState(frame)).findIntersection(rayToLight);
+			double t = ((Obstacle) obstacle.getState(frame))
+					.findIntersection(rayToLight);
 			if (obstacle != objectToColor && t > 0 && t < 1) {
 				return true;
 			}
@@ -286,76 +274,44 @@ public class RayTracer {
 		return false;
 	}
 
-	// I (Stephen) just cobbled this method together...how should we
-	// structure our code?
-	// KW: There have been a lot of untested changes to this method since its
-	// not actually used yet. It is composed mainly of chunks of code from the
-	// main method.
-	// If/when we decide to use it, lets repaste those chunks in case we failed
-	// to propogate
-	// changes correctly. (And then delete relevent chunks from main method)
-	public static Vector findIntersection(Ray ray, int frame) {
+	// KW: Fixed this method
+	public static CollisionPoint findClosestIntersection(Ray ray, int frame, Obstacle pastObstacle) {
 		double closest = Double.POSITIVE_INFINITY;
-		Vector closestNormal = null;
-		Color closestColor = null;
-		Object closestObject = null;
-		Vector closestLocation = new Vector();
-		closestLocation.setLight(false);
-		// find intersections with spheres
+		CollisionPoint collisionPoint = null;
 		for (Obstacle obstacle : obstacles) {
 			obstacle = (Obstacle) obstacle.getState(frame);
 			double intersect = obstacle.findIntersection(ray);
-			if (intersect >= 0 && intersect < closest) {
+			if (intersect >= 0 && intersect < closest && !obstacle.equals(pastObstacle)) {
 				closest = intersect;
 				Vector location = ray.scale(intersect);
-				closestNormal = obstacle.getNormal(location).normalize();
-				closestColor = obstacle.getColor(ray.getOrigin().add(
-						ray.getDirection().scale(intersect)));
-				closestObject = obstacle;
-				// for (Moveable m : spheres) {
-				// Sphere sphere = (Sphere) m.getState(frame);
-				// // double intersect = RayTracer.RayIntersectSphere(ray,
-				// // sphere);
-				// double intersect = sphere.findIntersection(ray);
-				// if (intersect >= 0 && intersect < closest) {
-				// closest = intersect;
-				// Vector location = ray.scale(intersect);
-				// closestNormal = sphere.getNormal(location).normalize();
-				// closestColor = sphere.getColor(ray.getOrigin().add(
-				// ray.getDirection().scale(intersect)));
-				// closestObject = sphere;
-
-				closestLocation = location;
-				closestLocation.setClosestNormal(closestNormal);
-				closestLocation.setClosestObject(closestObject);
-				closestLocation.setLight(false);
-				closestLocation.setColor(closestColor);
-			} else {
-				closestLocation = null;
+				collisionPoint = new CollisionPoint(obstacle, location, ray.getDirection());
 			}
 		}
-		return closestLocation;
+		return collisionPoint;
 	}
 
 	// Cobbled this method too...see above method comment
-	public static Color diffuseLightCalc(Vector closestNormal,
-			Color closestColor, Object closestObject, Vector closestLocation,
-			int frame) {
+	public static Color diffuseLightCalc(CollisionPoint collisionPoint, int frame) {
+		// incomingSightVector is for reflectiveness so we can determine how to
+		// reflect light
 		Color toColor = new Color(0, 0, 0, 255);
 		// might invert Color
 		boolean inverted = false;
-		if (closestNormal.dotProduct(eye.getState(frame).getVector()
-				.subtract(closestLocation)) < 0) {
+		Vector normal = collisionPoint.getObstacle().getNormal(collisionPoint.getLocation());
+		Color closestColor = collisionPoint.getObstacle().getColor(collisionPoint.getLocation());
+		if (normal.dotProduct(eye.getState(frame).getVector()
+				.subtract(collisionPoint.getLocation())) < 0) {
 			closestColor = closestColor.invert();
+			
 			inverted = true;
 		}
 		// apply lighting, use light interface...
 		for (Moveable m : lights) {
 			Light light = (Light) m.getState(frame);
-			if (!RayTracer.isLightBlocked(light, closestLocation,
-					closestObject, frame)) {
-				double nDotI = closestNormal.normalize().dotProduct(
-						light.getDirection(closestLocation).normalize());
+			if (!RayTracer.isLightBlocked(light, collisionPoint.getLocation(),
+					collisionPoint.getObstacle(), frame)) {
+				double nDotI = normal.normalize().dotProduct(
+						light.getDirection(collisionPoint.getLocation()).normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
 					toColor = toColor.add(closestColor.multiplyColors(
 							light.getColor()).multiply(nDotI));
@@ -363,6 +319,26 @@ public class RayTracer {
 
 			}
 		}
+		// return combination of diffuse color here plus color from reflection
+		Color finalColor = toColor.multiply(1 - collisionPoint.getObstacle()
+				.getReflectiveness());
+		Vector reflected = RayTracer.getReflectionVector(collisionPoint.getIncomingSightVector(),
+				normal);
+		Ray newSight = new Ray(collisionPoint.getLocation(), reflected);
+		CollisionPoint nextIntersection = RayTracer.findClosestIntersection(newSight, frame, collisionPoint.getObstacle());
+//		System.out.println(nextIntersection);
+//		try {
+//			Thread.sleep(100);
+//		} catch (Exception e) {
+//			
+//		}
+//		if (nextIntersection != null) {
+//			Color reflectedColor = diffuseLightCalc(
+//					nextIntersection.closestNormal, nextIntersection.color,
+//					nextIntersection.closestObstacle, nextIntersection, frame,
+//					reflected);
+//			finalColor = finalColor.add(reflectedColor.multiply(closestObstacle.reflectiveness));
+//		}
 		return toColor;
 	}
 
@@ -383,24 +359,28 @@ public class RayTracer {
 			return zeroColor;
 		if (sampleRay.getOrigin().size() == 0)
 			return zeroColor;
-		Vector intersection = findIntersection(sampleRay, frame);
-		if (intersection == null) {
+		CollisionPoint collisionPoint = findClosestIntersection(sampleRay, frame, null);
+		if (collisionPoint == null) {
 			return zeroColor;
 		} else {
-			if (intersection.getLight())
-				return intersection.getColor();
-			sampleRay = generateRandomRay(intersection);
+			// KW: removed checking if it was light -- it will never be light!
+			Color diffuse = diffuseLightCalc(collisionPoint, frame);
+			sampleRay = generateRandomRay(collisionPoint.getLocation());
 			Color gFactor = globalFactor(sampleRay, numBounces, frame);// recursively
 																		// shoot
 																		// rays
 																		// into
 																		// scene
-			Color diffuse = diffuseLightCalc(intersection.getClosestNormal(),
-					intersection.getColor(), intersection.getClosestObject(),
-					intersection, frame);
 			gFactor.multiplyColors(diffuse);
 			return gFactor;
 		}
+	}
+
+	public static Vector getReflectionVector(Vector incidentVector,
+			Vector normal) {
+		normal = normal.normalize();
+		return incidentVector.subtract(normal.scale(2).scale(
+				incidentVector.dotProduct(normal)));
 	}
 
 	public static Vector getVertex(int index) {
@@ -410,12 +390,13 @@ public class RayTracer {
 		return new Vector(RayTracer.vertices.get(RayTracer.vertices.size()
 				+ index));
 	}
-	
+
 	public static HashMap<String, Double> hashLine(Scanner s) {
 		HashMap<String, Double> retVal = new HashMap<String, Double>();
 		while (s.hasNext()) {
-			String[] nextKeyValuePair =s.next().split(":");
-			retVal.put(nextKeyValuePair[0], Double.parseDouble(nextKeyValuePair[1]));
+			String[] nextKeyValuePair = s.next().split(":");
+			retVal.put(nextKeyValuePair[0],
+					Double.parseDouble(nextKeyValuePair[1]));
 		}
 		return retVal;
 	}

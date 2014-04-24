@@ -15,7 +15,7 @@ public class Plane extends Obstacle {
 	private int id;
 
 	
-	public Plane(double A, double B, double C, double D, Color color) {
+	public Plane(double A, double B, double C, double D, Color color, double reflectiveness) {
 		this.A = A;
 		this.B = B;
 		this.C = C;
@@ -23,6 +23,7 @@ public class Plane extends Obstacle {
 		this.color = color;
 		this.texture = null;
 		this.bumpMap = null;
+		this.reflectiveness = reflectiveness;
 	}
 
 	
