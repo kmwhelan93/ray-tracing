@@ -278,21 +278,8 @@ public class RayTracer {
 		Vector directionToLight = light.getDirection(objectLocation);
 		Ray rayToLight = new Ray(objectLocation, directionToLight);
 		for (Obstacle obstacle : obstacles) {
-			double t = obstacle.findIntersection(rayToLight);
+			double t = ((Obstacle)obstacle.getState(frame)).findIntersection(rayToLight);
 			if (obstacle != objectToColor && t > 0 && t < 1) {
-				// for (Moveable m : spheres) {
-				// Sphere sphere = (Sphere) m.getState(frame);
-				// // double t = RayTracer.RayIntersectSphere(rayToLight,
-				// sphere);
-				// double t = sphere.findIntersection(rayToLight);
-				// if (sphere != objectToColor && t > 0 && t < 1) {
-				// return true;
-				// }
-				// }
-				// for (Plane plane : RayTracer.planes) {
-				// // double t = RayTracer.RayIntersectPlane(rayToLight, plane);
-				// double t = plane.findIntersection(rayToLight);
-				// if (plane != objectToColor && t > 0 && t < 1) {
 				return true;
 			}
 		}
