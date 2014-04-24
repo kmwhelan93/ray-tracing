@@ -338,7 +338,7 @@ public class RayTracer {
 								.normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
 					toColor = toColor.add(closestColor.multiplyColors(
-							light.getColor()).multiply(nDotI)).multiply(1 - amountLightBlocked);
+							light.getColor()).multiply(nDotI).multiply(1 - amountLightBlocked));
 				}
 			}
 		}
@@ -370,8 +370,8 @@ public class RayTracer {
 			if (nextIntersection != null) {
 				Color transparentColor = diffuseLightCalc(nextIntersection,
 						frame, depth + 1);
-				finalColor = finalColor.add(transparentColor).multiply(
-						collisionPoint.getObstacle().getTransparency());
+				finalColor = finalColor.add(transparentColor.multiply(
+						collisionPoint.getObstacle().getTransparency()));
 			}
 		}
 		return finalColor;
