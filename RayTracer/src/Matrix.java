@@ -14,6 +14,14 @@ public class Matrix {
 	public Matrix(int rows, int cols) {
 		this.matrix = new double[rows][cols];
 	}
+	public Matrix(Matrix m) {
+		this.matrix = new double[m.matrix.length][m.matrix[0].length];
+		for (int i = 0; i < m.matrix.length; i++) {
+			for (int j = 0; j < m.matrix[i].length; j++) {
+				this.matrix[i][j] = m.matrix[i][j];
+			}
+		}
+	}
 	
 	// getters and setters
 	public double get(int row, int col) {
@@ -76,5 +84,25 @@ public class Matrix {
 			m.set(i, i, 1);
 		}
 		return m;
+	}
+	
+	public Matrix transpose() {
+		Matrix retVal = new Matrix(this);
+		for (int row = 0; row < this.rows(); row++) {
+			for (int col = 0; col < this.cols(); col++) {
+				retVal.matrix[row][col] = this.matrix[col][row];
+			}
+		}
+		return retVal;
+	}
+	
+	public Matrix scale(double factor) {
+		Matrix retVal = new Matrix(this.rows(), this.cols());
+		for (int i = 0; i < this.rows(); i++) {
+			for (int j = 0; j < this.cols(); j++) {
+				retVal.set(i, j, this.matrix[i][j]*factor);
+			}
+		}
+		return retVal;
 	}
 }
