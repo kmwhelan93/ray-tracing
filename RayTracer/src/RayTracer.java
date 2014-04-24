@@ -119,8 +119,7 @@ public class RayTracer {
 							Double.parseDouble(line[7]));
 					int id = Integer.parseInt(line[8]);
 					Sphere s = new Sphere(v, radius, color,
-							Double.parseDouble(line[10]),
-							Double.parseDouble(line[11]));
+							Double.parseDouble(line[10]), Double.parseDouble(line[11]));
 					s.setId(id);
 					s.frameNumber = Integer.parseInt(line[9]);
 					if (command.equals("sphereB")) {
@@ -147,8 +146,7 @@ public class RayTracer {
 							Double.parseDouble(line[8]));
 					double reflectiveness = Double.parseDouble(line[9]);
 					double transparency = Double.parseDouble(line[10]);
-					Plane plane = new Plane(id, A, B, C, D, color,
-							reflectiveness, transparency);
+					Plane plane = new Plane(id, A, B, C, D, color, reflectiveness, transparency);
 					if (command.equals("planeB")) {
 						plane.setBumpMap(line[8]);
 					} else if (command.equals("planeT")) {
@@ -187,7 +185,7 @@ public class RayTracer {
 						p3 = RayTracer.getVertex(map.get("p3").intValue());
 						reflectiveness = map.get("reflectiveness");
 						transparency = map.get("transparency");
-
+						
 					}
 					Triangle triangle = new Triangle(id, p1, p2, p3,
 							reflectiveness, transparency);
@@ -262,8 +260,7 @@ public class RayTracer {
 						int numFactoredSampleRays = numSampleRays;
 						Color sumColor = new Color(0, 0, 0, 255);
 						Color toColor = new Color(0, 0, 0, 255);
-						toColor = RayTracer.diffuseLightCalc(collisionPoint, i,
-								0);
+						toColor = RayTracer.diffuseLightCalc(collisionPoint, i, 0);
 						for (int a = 0; a < numSampleRays; a++) {
 							Ray currentSampleRay = RayTracer
 									.generateRandomRay(collisionPoint
@@ -311,20 +308,18 @@ public class RayTracer {
 		return Double.POSITIVE_INFINITY;
 	}
 
-	// returns 0 to 1 where 0 is not blocked and 1 is entirely blocked
-	public static double amountLightBlocked(Light light, Vector objectLocation,
+	public static boolean isLightBlocked(Light light, Vector objectLocation,
 			Object objectToColor, int frame) {
 		Vector directionToLight = light.getDirection(objectLocation);
 		Ray rayToLight = new Ray(objectLocation, directionToLight);
-		double totalBlockage = 0;
 		for (Obstacle obstacle : obstacles) {
 			double t = ((Obstacle) obstacle.getState(frame))
 					.findIntersection(rayToLight);
 			if (obstacle != objectToColor && t > 0 && t < 1) {
-				totalBlockage += 1 - obstacle.transparency;
+				return true;
 			}
 		}
-		return totalBlockage;
+		return false;
 	}
 
 	// KW: Fixed this method
@@ -367,23 +362,21 @@ public class RayTracer {
 		// apply lighting, use light interface...
 		for (Moveable m : lights) {
 			Light light = (Light) m.getState(frame);
-			double amountLightBlocked = RayTracer.amountLightBlocked(light,
-					collisionPoint.getLocation(), collisionPoint.getObstacle(),
-					frame);
-			if (amountLightBlocked < 1) {
+			if (!RayTracer.isLightBlocked(light, collisionPoint.getLocation(),
+					collisionPoint.getObstacle(), frame)) {
 				double nDotI = normal.normalize().dotProduct(
 						light.getDirection(collisionPoint.getLocation())
 								.normalize());
 				if ((nDotI > 0 && !inverted) || (inverted && nDotI < 0)) {
 					toColor = toColor.add(closestColor.multiplyColors(
-							light.getColor()).multiply(nDotI).multiply(1 - amountLightBlocked));
+							light.getColor()).multiply(nDotI));
 				}
+
 			}
 		}
 		// return combination of diffuse color here plus color from reflection
-		Color finalColor = toColor.multiply(1
-				- collisionPoint.getObstacle().getReflectiveness()
-				- collisionPoint.getObstacle().getTransparency());
+		Color finalColor = toColor.multiply(1 - collisionPoint.getObstacle()
+				.getReflectiveness() - collisionPoint.getObstacle().getTransparency());
 		if (collisionPoint.getObstacle().getReflectiveness() > 0 && depth < 40) {
 			Vector reflected = RayTracer.getReflectionVector(
 					collisionPoint.getIncomingSightVector(), normal);
@@ -393,23 +386,17 @@ public class RayTracer {
 							collisionPoint.getObstacle());
 
 			if (nextIntersection != null) {
-				Color reflectedColor = diffuseLightCalc(nextIntersection,
-						frame, depth + 1);
+				Color reflectedColor = diffuseLightCalc(nextIntersection, frame, depth + 1);
 				finalColor = finalColor.add(reflectedColor
 						.multiply(collisionPoint.getObstacle().reflectiveness));
 			}
 		}
 		if (collisionPoint.getObstacle().getTransparency() > 0 && depth < 40) {
-			Ray transparencyRay = new Ray(collisionPoint.getLocation(),
-					collisionPoint.getIncomingSightVector());
-			CollisionPoint nextIntersection = RayTracer
-					.findClosestIntersection(transparencyRay, frame,
-							collisionPoint.getObstacle());
+			Ray transparencyRay = new Ray(collisionPoint.getLocation(), collisionPoint.getIncomingSightVector());
+			CollisionPoint nextIntersection = RayTracer.findClosestIntersection(transparencyRay, frame, collisionPoint.getObstacle());
 			if (nextIntersection != null) {
-				Color transparentColor = diffuseLightCalc(nextIntersection,
-						frame, depth + 1);
-				finalColor = finalColor.add(transparentColor.multiply(
-						collisionPoint.getObstacle().getTransparency()));
+				Color transparentColor = diffuseLightCalc(nextIntersection, frame, depth + 1);
+				finalColor = finalColor.add(transparentColor).multiply(collisionPoint.getObstacle().getTransparency());
 			}
 		}
 		return finalColor;
