@@ -7,8 +7,16 @@ public abstract class Moveable {
 	// the same way. Since Planes have an empty moveableOverFrames, this
 	// shouldn't be a problem.
 	ArrayList<Moveable> moveableOverFrames;
-	int frameNumber;
-	int id;
+	protected int frameNumber;
+	protected int id;
+	
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public Moveable() {
 		moveableOverFrames = new ArrayList<Moveable>();
@@ -98,7 +106,7 @@ public abstract class Moveable {
 						Sphere thisSphere = (Sphere)this;
 						Sphere s = new Sphere(v, radius, color, thisSphere.getReflectiveness());
 						s.setBumpMap(((Sphere) this).getBumpMap());
-
+						s.setId(this.id);
 						return s;
 					}
 
@@ -106,7 +114,6 @@ public abstract class Moveable {
 
 			}
 		}
-
 		return this;
 
 	}

@@ -10,7 +10,6 @@ public class Sphere extends Obstacle {
 	private BufferedImage texture;
 	private BufferedImage bumpMap;
 	private double radius;
-	private int id;
 
 	// getters & setters
 	public Vector getCenter() {
@@ -21,13 +20,6 @@ public class Sphere extends Obstacle {
 		this.center = center;
 	}
 
-	public int getId() {
-		return this.id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
 	// New get color method to add in texture mapping
 	// Parameters: vector representation of point on sphere we're coloring, 
 	// 		pass null for original color

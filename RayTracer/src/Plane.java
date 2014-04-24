@@ -12,10 +12,10 @@ public class Plane extends Obstacle {
 	private Color color;
 	private BufferedImage texture;
 	private BufferedImage bumpMap;
-	private int id;
 
 	
-	public Plane(double A, double B, double C, double D, Color color, double reflectiveness) {
+	public Plane(int id, double A, double B, double C, double D, Color color, double reflectiveness) {
+		this.id = id;
 		this.A = A;
 		this.B = B;
 		this.C = C;

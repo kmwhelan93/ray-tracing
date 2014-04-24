@@ -2,7 +2,6 @@ import java.awt.image.BufferedImage;
 
 
 public class Triangle extends Obstacle {
-	private int id;
 	private Vector p1;
 	private Vector p2;
 	private Vector p3;
@@ -23,7 +22,7 @@ public class Triangle extends Obstacle {
 	public double findIntersection(Ray ray) {
 		Vector normal = this.getNormal(null);
 		double d =-1*( p1.dotProduct(normal));
-		Plane p = new Plane(normal.get(0), normal.get(1), normal.get(2), d, null, 0);
+		Plane p = new Plane(0, normal.get(0), normal.get(1), normal.get(2), d, null, 0);
 		double t = p.findIntersection(ray);
 //		System.out.println("ray: " + ray);
 		Vector intersectionPoint = ray.scale(t);
