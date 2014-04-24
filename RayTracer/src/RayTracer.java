@@ -19,19 +19,17 @@ public class RayTracer {
 											// scene after initial intersection;
 	private static Color zeroColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
-	private static Moveable eye = new Eye(new Vector(2, 0, 0));
-	private static Vector forward = new Vector(-1, 0, 0);
-	private static Vector right = new Vector(0, 1, 0);
-	private static Vector up = new Vector(0, 0, 1);
+	private static Moveable eye = new Eye(new Vector(0, 0, 0));
+	private static Vector forward = new Vector(0, 0, -1);
+	private static Vector right = new Vector(1, 0, 0);
+	private static Vector up = new Vector(0, 1, 0);
 	// private static ArrayList<Light> lights = new ArrayList<Light>();
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Light> lights = new ArrayList<Light>();
 	private static ArrayList<Vector> vertices = new ArrayList<Vector>();
-	
 
 	public static void main(String[] args) throws Exception {
-		
-		
+
 		Scanner scan = new Scanner(new File("test.txt"));
 		String filename = "";
 
@@ -55,9 +53,11 @@ public class RayTracer {
 				} else if (command.equals("eye")) {
 					Eye e = new Eye(new Vector(Double.parseDouble(line[1]),
 							Double.parseDouble(line[2]),
-							Double.parseDouble(line[3])));
+							Double.parseDouble(line[3]),
+							Integer.parseInt(line[4])));
 					e.frameNumber = Integer.parseInt(line[4]);
 					eye.addCheckpoint(e);
+					eye.frameNumber = Integer.parseInt(line[4]);
 				} else if (command.equals("forward")) {
 					// do not normalize
 					forward = new Vector(Double.parseDouble(line[1]),
@@ -190,44 +190,6 @@ public class RayTracer {
 					Triangle triangle = new Triangle(id, p1, p2, p3,
 							reflectiveness, transparency);
 					RayTracer.obstacles.add(triangle);
-				} else if (command.equals("cylinder")) {
-
-					int id;
-					Color color;
-					double reflectiveness;
-					double transparency;
-					double degrees;
-					double axisx;
-					double axisy;
-					double axisz;
-					if (!nextLine.contains(":")) {
-						id = lineReader.nextInt();
-						color = new Color(lineReader.nextDouble(), lineReader.nextDouble(), lineReader.nextDouble());
-						reflectiveness = lineReader.nextDouble();
-						transparency = lineReader.nextDouble();
-						degrees = lineReader.nextDouble();
-						axisx = lineReader.nextDouble();
-						axisy = lineReader.nextDouble();
-						axisz = lineReader.nextDouble();
-					} else {
-						HashMap<String, Double> map = RayTracer
-								.hashLine(lineReader);
-						id = map.get("id").intValue();
-						color = new Color(map.get("r"), map.get("g"), map.get("b"));
-						reflectiveness = map.get("reflectiveness");
-						transparency = map.get("transparency");
-						degrees = map.get("degrees");
-						axisx = map.get("axisx");
-						axisy = map.get("axisy");
-						axisz = map.get("axisz");
-					}
-					Vector rotateAxis = new Vector(axisx, axisy, axisz);
-					Matrix rotate = RayTracer.rotate(degrees, rotateAxis);
-					
-					Cylinder cylinder = new Cylinder(id, 1, color, rotate,
-							reflectiveness, transparency);
-					RayTracer.obstacles.add(cylinder);
-				
 				}
 			}
 		}
@@ -266,10 +228,10 @@ public class RayTracer {
 									.generateRandomRay(collisionPoint
 											.getLocation());
 							int currentSampleNumBounces = 0;
-							// Color gFactor = new Color(1, 1, 1, 255);
+							 Color gFactor = new Color(1, 1, 1, 255);
 							// FIXME
-							Color gFactor = globalFactor(currentSampleRay,
-									currentSampleNumBounces, i);
+							//Color gFactor = globalFactor(currentSampleRay,
+								//	currentSampleNumBounces, i);
 							if (gFactor == null) {
 
 							} else {
@@ -277,12 +239,12 @@ public class RayTracer {
 									numFactoredSampleRays -= 1;
 									continue;
 								}
-								toColor.multiplyColors(gFactor);
-								sumColor.add(toColor);
+								toColor.multiplyColors(gFactor);//should be toString = ...
+								sumColor.add(toColor);//should be sumColor = ...
 							}
 
 						}
-						sumColor.divide(numFactoredSampleRays);
+						sumColor.divide(numFactoredSampleRays);//should be toColor = ...
 						r.setPixel(col, row, toColor.getColorArray());
 					}
 				}
@@ -460,82 +422,5 @@ public class RayTracer {
 					Double.parseDouble(nextKeyValuePair[1]));
 		}
 		return retVal;
-	}
-	
-	public static double convertToRadians(double degrees) {
-		return (degrees / 180) * Math.PI;
-	}
-	
-	public static Matrix rotate(double degrees, Vector axis) {
-		axis = axis.normalize();
-		double radians = RayTracer.convertToRadians(degrees);
-		double c = Math.cos(radians);
-		double s = Math.sin(radians);
-		double x = axis.get(0);
-		double y = axis.get(1);
-		double z = axis.get(2);
-		double[][] rotate = {
-				{ x * x * (1 - c) + c, x * y * (1 - c) - z * s,
-						x * z * (1 - c) + y * s},
-				{ y * x * (1 - c) + z * s, y * y * (1 - c) + c,
-						y * z * (1 - c) - x * s},
-				{ x * z * (1 - c) - y * s, y * z * (1 - c) + x * s,
-						z * z * (1 - c) + c}};
-		return new Matrix(rotate);
-	}
-	
-	public static Matrix inverse(Matrix m) {
-		// see http://www.mathsisfun.com/algebra/matrix-inverse-minors-cofactors-adjugate.html
-		Matrix intermediate = new Matrix(m);
-		// matrix of minors
-		// saving these for later
-		double det1 = 0;
-		double det2 = 0;
-		double det3 = 0;
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				ArrayList<Integer> rows = new ArrayList<Integer>();
-				rows.add(0);
-				rows.add(1);
-				rows.add(2);
-				rows.remove(new Integer(i));
-				ArrayList<Integer> cols = new ArrayList<Integer>();
-				cols.add(0);
-				cols.add(1);
-				cols.add(2);
-				cols.remove(new Integer(j));
-				double result = m.matrix[rows.get(0)][cols.get(0)] * 
-						m.matrix[rows.get(1)][cols.get(1)] -
-						m.matrix[rows.get(0)][cols.get(1)]*m.matrix[rows.get(1)][cols.get(0)];
-				intermediate.matrix[i][j] = result;
-				if (i == 0) {
-					if (j == 0)
-						det1 = result;
-					if (j == 1)
-						det2 = result;
-					if (j == 2)
-						det3 = result;
-				}
-			}
-		}
-		// matrix of cofactors
-		int count = 0;
-		for (int row = 0; row < 3; row++) {
-			for (int col = 0; col < 3; col++) {
-				if (count % 2 != 0) {
-					intermediate.matrix[row][col] = -1*intermediate.matrix[row][col];
-				}
-				count++;
-			}
-		}
-		// adjugate (also called adjoint)
-		intermediate = intermediate.transpose();
-		
-		// multiply by 1/Determinant
-		double det = m.get(0, 0) * det1
-				- m.get(0, 1) * det2
-				+ m.get(0, 2) * det3;
-		intermediate = intermediate.scale(1/det);
-		return intermediate;
 	}
 }
