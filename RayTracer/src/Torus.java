@@ -41,19 +41,20 @@ public class Torus extends Obstacle {
 
 	@Override
 	public Vector getNormal(Vector location) {
-		// TODO Auto-generated method stub
-		return null;
+		Vector q = location.scale(this.majorRadius / Math.sqrt(Math.pow(location.get(0), 2) + Math.pow(location.get(1), 2)));
+		Vector n = location.subtract(q);
+		n = n.normalize();
+		return n;
 	}
 
 	@Override
 	public Color getColor(Vector pt) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.color;
 	}
 
 	@Override
 	public Vector getVector() {
-		// TODO Auto-generated method stub
+		//TODO
 		return null;
 	}
 
