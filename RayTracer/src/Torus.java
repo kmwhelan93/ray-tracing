@@ -11,6 +11,18 @@ public class Torus extends Obstacle {
 		this.majorRadius = majorRadius;
 		this.minorRadius = minorRadius;
 	}
+	
+	public Vector getCenter() {
+		return center;
+	}
+	
+	public double getMinR() {
+		return minorRadius;
+	}
+	
+	public double getMaxR() {
+		return majorRadius;
+	}
 	@Override
 	public double findIntersection(Ray ray) {
 		double pz = ray.getOrigin().get(2);
@@ -28,16 +40,17 @@ public class Torus extends Obstacle {
 		double e = Math.pow(ray.getOrigin().dotProduct(ray.getOrigin()) - Math.pow(minorRadius, 2) - Math.pow(majorRadius, 2), 2)
 				+ 4 * Math.pow(majorRadius, 2) * Math.pow(pz, 2)
 				- 4 * Math.pow(majorRadius, 2) * Math.pow(minorRadius, 2);
+//		System.out.println(a + " " + b + " " + c + " " + d + " " + e);
 		//compute sub problems...
-		double p1 = (2 * Math.pow(c, 3)) - (9 * b * c * d) + (27 * b * b * e) - (72 * a * c * e);
-		double temp = -4 * Math.pow(((c * c) - (3* b * d) + (12 * a * e)), 3);
+		double p1 = (2 * Math.pow(c, 3)) - (9 * b * c * d) + (27 * a * d * d) + (27 * b * b * e) - (72 * a * c * e);
+		double temp = -4 * Math.pow(((c * c) - (3* b * d) + (12 * a * e)), 3) + Math.pow(p1,2);
 		double p2;
 		if(temp < 0){
 			p2 = Double.POSITIVE_INFINITY;
 		} else {
 			p2 = p1 + Math.sqrt(temp);	
 		}
-		double p3 = ((c*c) - (3 * b * d) + (12 * a * e) / (3 * a * Math.pow(p2/2, .333))) + Math.pow(p2/2, .333)/ (3 * a);
+		double p3 = (((c*c) - (3 * b * d) + (12 * a * e)) / (3 * a * Math.pow(p2/2, 1/3.0))) + Math.pow(p2/2, 1/3.0)/ (3 * a);
 		double p4;
 		double temp2 = ((b*b)/(4 * a * a)) - ((2*c)/(3*a)) + p3;
 		if(temp2 < 0){
@@ -64,6 +77,14 @@ public class Torus extends Obstacle {
 			sol3 = ((-1)*(b/(4*a))) + (p4/2) - (Math.sqrt(p5+p6)/2);
 			sol4 = ((-1)*(b/(4*a))) + (p4/2) + (Math.sqrt(p5+p6)/2);
 		}
+//		if (sol1 < 0)
+//			sol1 = Double.POSITIVE_INFINITY;
+//		if (sol2 < 0)
+//			sol2 = Double.POSITIVE_INFINITY;
+//		if (sol3 < 0)
+//			sol3 = Double.POSITIVE_INFINITY;
+//		if (sol4 < 0)
+//			sol4 = Double.POSITIVE_INFINITY;
 		double t = Math.min(sol1, sol2);
 		t = Math.min(t, sol3);
 		t = Math.min(t, sol4);

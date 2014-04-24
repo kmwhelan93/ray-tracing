@@ -192,6 +192,18 @@ public class RayTracer {
 					Triangle triangle = new Triangle(id, p1, p2, p3,
 							reflectiveness, transparency);
 					RayTracer.obstacles.add(triangle);
+				} else if (command.equals("torus")) {
+					System.out.println("torus");
+					Vector center = new Vector(Double.parseDouble(line[1]), Double.parseDouble(line[2]), Double.parseDouble(line[3]));
+					double radius1 = Double.parseDouble(line[4]);
+					double radius2 = Double.parseDouble(line[5]);
+					Color color = new Color(Double.parseDouble(line[6]),Double.parseDouble(line[7]),Double.parseDouble(line[8]));
+					int id = Integer.parseInt(line[9]);
+					double frameNum = Double.parseDouble(line[10]);
+					Torus torus = new Torus(center, color, radius2, radius1);
+					torus.setId(id);
+					System.out.println("TORUS center: " + torus.getCenter() + " color: " + torus.getColor(null) + " min: " + torus.getMinR() + " max: " + torus.getMaxR());
+					obstacles.add(torus);
 				}
 			}
 		}
