@@ -54,8 +54,7 @@ public class Torus extends Obstacle {
 
 	@Override
 	public Vector getVector() {
-		//TODO
-		return null;
+		return this.center;
 	}
 
 	@Override
