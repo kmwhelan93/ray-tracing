@@ -4,6 +4,13 @@ public class Torus extends Obstacle {
 	private Color color;
 	private double majorRadius;
 	private double minorRadius;
+	
+	public Torus(Vector center, Color color, double majorRadius, double minorRadius) {
+		this.center = center;
+		this.color = color;
+		this.majorRadius = majorRadius;
+		this.minorRadius = minorRadius;
+	}
 	@Override
 	public double findIntersection(Ray ray) {
 		double pz = ray.getOrigin().get(2);
