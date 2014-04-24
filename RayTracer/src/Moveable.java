@@ -95,7 +95,8 @@ public abstract class Moveable {
 								.getRadius() - moveableOverFrames.get(i)
 								.getRadius()) * framePoint)
 								+ moveableOverFrames.get(i).getRadius();
-						Sphere s = new Sphere(v, radius, color);
+						Sphere thisSphere = (Sphere)this;
+						Sphere s = new Sphere(v, radius, color, thisSphere.getReflectiveness());
 						s.setBumpMap(((Sphere) this).getBumpMap());
 
 						return s;
@@ -108,5 +109,12 @@ public abstract class Moveable {
 
 		return this;
 
+	}
+	
+	public boolean equals(Object o) {
+		if (!(o instanceof Moveable)) {
+			return false;
+		}
+		return this.id == ((Moveable)o).id;
 	}
 }

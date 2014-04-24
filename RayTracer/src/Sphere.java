@@ -104,12 +104,13 @@ public class Sphere extends Obstacle {
 	}
 
 	// Constructors
-	public Sphere(Vector center, double radius, Color color) {
+	public Sphere(Vector center, double radius, Color color, double reflectiveness) {
 		this.center = center;
 		this.radius = radius;
 		this.color = color;
 		this.texture = null;
 		this.bumpMap = null;
+		this.reflectiveness = reflectiveness;
 	}
 
 	// Altered for bump mapping

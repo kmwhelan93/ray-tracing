@@ -6,8 +6,6 @@ public class Vector extends Matrix {
 	
 	boolean isLight = false;
 	Color color;
-	Object closestObject;
-	Vector closestNormal;
 	
 	public Vector(double... values) {
 		matrix = new double[values.length][1];
@@ -19,8 +17,6 @@ public class Vector extends Matrix {
 		this.isLight = v.isLight;
 		this.color = v.color;
 		this.matrix = v.matrix;
-		this.closestObject = v.closestObject;
-		this.closestNormal = v.closestNormal;
 	}
 	public Vector(double x, double y, double z, Color color) {
 		matrix = new double[3][1];
@@ -68,18 +64,7 @@ public class Vector extends Matrix {
 		return this.isLight;
 	}
 	
-	public Object getClosestObject() {
-		return closestObject;
-	}
-	public void setClosestObject(Object closestObject) {
-		this.closestObject = closestObject;
-	}
-	public Vector getClosestNormal() {
-		return closestNormal;
-	}
-	public void setClosestNormal(Vector closestNormal) {
-		this.closestNormal = closestNormal;
-	}
+	
 	
 	public double dotProduct(Vector v) {
 		double sum = 0;
