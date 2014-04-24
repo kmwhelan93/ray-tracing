@@ -104,7 +104,7 @@ public abstract class Moveable {
 								.getRadius()) * framePoint)
 								+ moveableOverFrames.get(i).getRadius();
 						Sphere thisSphere = (Sphere)this;
-						Sphere s = new Sphere(v, radius, color, thisSphere.getReflectiveness());
+						Sphere s = new Sphere(v, radius, color, thisSphere.getReflectiveness(), thisSphere.getTransparency());
 						s.setBumpMap(((Sphere) this).getBumpMap());
 						s.setId(this.id);
 						return s;

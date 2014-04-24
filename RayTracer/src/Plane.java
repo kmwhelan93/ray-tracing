@@ -14,7 +14,7 @@ public class Plane extends Obstacle {
 	private BufferedImage bumpMap;
 
 	
-	public Plane(int id, double A, double B, double C, double D, Color color, double reflectiveness) {
+	public Plane(int id, double A, double B, double C, double D, Color color, double reflectiveness, double transparency) {
 		this.id = id;
 		this.A = A;
 		this.B = B;
@@ -24,6 +24,7 @@ public class Plane extends Obstacle {
 		this.texture = null;
 		this.bumpMap = null;
 		this.reflectiveness = reflectiveness;
+		this.transparency = transparency;
 	}
 
 	
