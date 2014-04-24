@@ -4,7 +4,7 @@ public class Torus extends Obstacle {
 	private Color color;
 	private double majorRadius;
 	private double minorRadius;
-	
+	//added constructor
 	public Torus(Vector center, Color color, double majorRadius, double minorRadius) {
 		this.center = center;
 		this.color = color;
