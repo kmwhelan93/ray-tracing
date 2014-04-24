@@ -19,10 +19,10 @@ public class RayTracer {
 											// scene after initial intersection;
 	private static Color zeroColor = new Color(0, 0, 0, 255);
 	private static int framesNum;
-	private static Moveable eye = new Eye(new Vector(0, 0, 0));
-	private static Vector forward = new Vector(0, 0, -1);
-	private static Vector right = new Vector(1, 0, 0);
-	private static Vector up = new Vector(0, 1, 0);
+	private static Moveable eye = new Eye(new Vector(2, 0, 0));
+	private static Vector forward = new Vector(-1, 0, 0);
+	private static Vector right = new Vector(0, 1, 0);
+	private static Vector up = new Vector(0, 0, 1);
 	// private static ArrayList<Light> lights = new ArrayList<Light>();
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Light> lights = new ArrayList<Light>();

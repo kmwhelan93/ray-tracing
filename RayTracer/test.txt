@@ -17,4 +17,4 @@ vertex -1 1 -1    1 0 0
 vertex 1 0 -1     1 0 0
 vertex -1 -1 -1	  1 0 0
 //triangle id:13 p1:-3 p2:-1 p3:-2 reflectiveness:0 transparency:0
-cylinder id:25 r:1 g:0 b:1   degrees:60 axisx:1 axisy:1 axisz:0               reflectiveness:0 transparency:0
+cylinder id:25 r:1 g:0 b:1   degrees:90 axisx:1 axisy:0 axisz:0               reflectiveness:0 transparency:0

@@ -19,6 +19,8 @@ public class Cylinder extends Obstacle {
 		// E + tD
 		Vector D = ray.getDirection();
 		Vector E = ray.getOrigin();
+		D = new Vector(RayTracer.inverse(this.rotate).multiply(D));
+		E = new Vector(RayTracer.inverse(this.rotate).multiply(E));
 		// First untransform D and E
 		
 		
@@ -37,7 +39,8 @@ public class Cylinder extends Obstacle {
 	}
 	@Override
 	public Vector getNormal(Vector location) {
-		return new Vector(location.get(0), location.get(1), 0).normalize();
+		location = new Vector(RayTracer.inverse(this.rotate).multiply(location));
+		return new Vector(this.rotate.multiply(new Vector(location.get(0), location.get(1), 0).normalize()));
 	}
 	@Override
 	public Color getColor(Vector pt) {
