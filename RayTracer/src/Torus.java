@@ -23,16 +23,40 @@ public class Torus extends Obstacle {
 				- 4 * Math.pow(majorRadius, 2) * Math.pow(minorRadius, 2);
 		//compute sub problems...
 		double p1 = (2 * Math.pow(c, 3)) - (9 * b * c * d) + (27 * b * b * e) - (72 * a * c * e);
-		double p2 = p1 + Math.sqrt(-4 * Math.pow(((c * c) - (3* b * d) + (12 * a * e)), 3));
+		double temp = -4 * Math.pow(((c * c) - (3* b * d) + (12 * a * e)), 3);
+		double p2;
+		if(temp < 0){
+			p2 = Double.POSITIVE_INFINITY;
+		} else {
+			p2 = p1 + Math.sqrt(temp);	
+		}
 		double p3 = ((c*c) - (3 * b * d) + (12 * a * e) / (3 * a * Math.pow(p2/2, .333))) + Math.pow(p2/2, .333)/ (3 * a);
-		double p4 = Math.sqrt(((b*b)/(4 * a * a)) - ((2*c)/(3*a)) + p3);
+		double p4;
+		double temp2 = ((b*b)/(4 * a * a)) - ((2*c)/(3*a)) + p3;
+		if(temp2 < 0){
+			p4 = Double.POSITIVE_INFINITY;
+		} else {
+			p4 = Math.sqrt(temp2);	
+		}
 		double p5 = ((b*b)/(2*a*a)) - ((4*c)/(3*a)) - p3;
 		double p6 = ( ((b*b*b*(-1))/(a*a*a)) + ((4*b*c)/(a*a)) - ((8*d)/(a))) / (4 * p4);
 		//compute solutions...
-		double sol1 = ((-1)*(b/(4*a))) - (p4/2) - (Math.sqrt(p5-p6)/2);
-		double sol2 = ((-1)*(b/(4*a))) - (p4/2) + (Math.sqrt(p5-p6)/2);
-		double sol3 = ((-1)*(b/(4*a))) + (p4/2) - (Math.sqrt(p5+p6)/2);
-		double sol4 = ((-1)*(b/(4*a))) + (p4/2) + (Math.sqrt(p5+p6)/2);
+		double sol1, sol2;
+		if(p5-p6 < 0){
+			sol1 = Double.POSITIVE_INFINITY;
+			sol2 = Double.POSITIVE_INFINITY;
+		} else {
+			sol1 = ((-1)*(b/(4*a))) - (p4/2) - (Math.sqrt(p5-p6)/2);
+			sol2 = ((-1)*(b/(4*a))) - (p4/2) + (Math.sqrt(p5-p6)/2);
+		}
+		double sol3, sol4;
+		if(p5+p6 < 0){
+			sol3 = Double.POSITIVE_INFINITY;
+			sol4 = Double.POSITIVE_INFINITY;
+		} else {
+			sol3 = ((-1)*(b/(4*a))) + (p4/2) - (Math.sqrt(p5+p6)/2);
+			sol4 = ((-1)*(b/(4*a))) + (p4/2) + (Math.sqrt(p5+p6)/2);
+		}
 		double t = Math.min(sol1, sol2);
 		t = Math.min(t, sol3);
 		t = Math.min(t, sol4);
